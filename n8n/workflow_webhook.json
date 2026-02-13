@@ -1,0 +1,397 @@
+{
+  "name": "Clarity AI – Assignment 5 – Webhook Version",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "clarity-analyze",
+        "options": {
+          "responseMode": "responseNode"
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-600, 208],
+      "webhookId": "clarity-analyze"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ═══════════════════════════════════════════════════════════════════════════\n// PARSE WEBHOOK INPUT & ROUTE BY MODE\n// ═══════════════════════════════════════════════════════════════════════════\n\nconst input = $input.first().json;\nconst body = input.body || input;\n\nconst mode = body.mode || 'synthetic';  // synthetic | kaggle | upload\nconst goal = body.goal || 'roas';\nconst budget = body.budget || 10000;\nconst email = body.email || null;\nconst data = body.data || {};\n\nconst run_date = new Date().toISOString().slice(0, 10);\nconst generated_at = new Date().toISOString();\n\nreturn [{\n  json: {\n    mode,\n    goal,\n    budget,\n    email,\n    run_date,\n    generated_at,\n    schema_version: 'clarity-v2',\n    ads_data: data.ads || [],\n    seo_data: data.seo || [],\n    crm_data: data.crm || []\n  }\n}];\n"
+      },
+      "id": "parse-input",
+      "name": "Parse Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-400, 208]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "kaggle-mode",
+              "leftValue": "={{ $json.mode }}",
+              "rightValue": "kaggle",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "mode-router",
+      "name": "Mode Router",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-200, 208]
+    },
+    {
+      "parameters": {
+        "url": "https://www.kaggle.com/api/v1/datasets/download/nayakganesh007/google-ads-sales-dataset",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "options": {}
+      },
+      "id": "ads-download",
+      "name": "Ads: Download",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [0, 0],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "i5vcRrDpVcBDJcUa",
+          "name": "Kaggle API"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {},
+      "id": "ads-unzip",
+      "name": "Ads: Unzip",
+      "type": "n8n-nodes-base.compression",
+      "typeVersion": 1,
+      "position": [208, 0],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "binaryPropertyName": "file_0",
+        "options": {}
+      },
+      "id": "ads-parse-csv",
+      "name": "Ads: Parse CSV",
+      "type": "n8n-nodes-base.spreadsheetFile",
+      "typeVersion": 2,
+      "position": [400, 0],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Ads Normalize (Kaggle data)\nconst results = [];\nconst context = $('Parse Input').first().json;\n\nfor (const item of $input.all()) {\n  try {\n    const r = item.json;\n    if (r.error) continue;\n    \n    const keyword = String(r.Keyword || '').trim().toLowerCase();\n    if (!keyword) continue;\n    \n    results.push({\n      json: {\n        source: 'ads',\n        keyword,\n        campaign: r.Campaign_Name || null,\n        impressions: Number(String(r.Impressions || 0).replace(/[^0-9.]/g, '')) || 0,\n        clicks: Number(String(r.Clicks || 0).replace(/[^0-9.]/g, '')) || 0,\n        spend: Number(String(r.Cost || 0).replace(/[$,]/g, '')) || 0,\n        conversions: Number(r.Conversions) || 0,\n        revenue: Number(String(r.Sale_Amount || 0).replace(/[$,]/g, '')) || 0,\n        leads: Number(r.Leads) || 0\n      }\n    });\n  } catch (e) {\n    continue;\n  }\n}\n\nreturn results.slice(0, 150);\n"
+      },
+      "id": "ads-normalize-kaggle",
+      "name": "Ads: Normalize (Kaggle)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [600, 0]
+    },
+    {
+      "parameters": {
+        "url": "https://www.kaggle.com/api/v1/datasets/download/sheryshisingh/seo-keyword-research",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "options": {}
+      },
+      "id": "seo-download",
+      "name": "SEO: Download",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [0, 200],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "i5vcRrDpVcBDJcUa",
+          "name": "Kaggle API"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {},
+      "id": "seo-unzip",
+      "name": "SEO: Unzip",
+      "type": "n8n-nodes-base.compression",
+      "typeVersion": 1,
+      "position": [208, 200],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "binaryPropertyName": "file_0",
+        "options": {}
+      },
+      "id": "seo-parse-csv",
+      "name": "SEO: Parse CSV",
+      "type": "n8n-nodes-base.spreadsheetFile",
+      "typeVersion": 2,
+      "position": [400, 200],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// SEO Normalize (Kaggle data)\nconst results = [];\n\nfor (const item of $input.all()) {\n  try {\n    const r = item.json;\n    if (r.error) continue;\n    \n    const keyword = String(r.text || r.keyword || '').trim().toLowerCase();\n    if (!keyword) continue;\n    \n    results.push({\n      json: {\n        source: 'seo',\n        keyword,\n        volume: Number(r.vol || r.volume || 0) || 0,\n        cpc: Number(r.cpc || 0) || 0,\n        competition: r.competition || 'medium',\n        score: Number(r.score || 0) || 0\n      }\n    });\n  } catch (e) {\n    continue;\n  }\n}\n\nreturn results.slice(0, 200);\n"
+      },
+      "id": "seo-normalize-kaggle",
+      "name": "SEO: Normalize (Kaggle)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [600, 200]
+    },
+    {
+      "parameters": {
+        "url": "https://www.kaggle.com/api/v1/datasets/download/olistbr/marketing-funnel-olist",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "options": {}
+      },
+      "id": "crm-download",
+      "name": "CRM: Download",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [0, 400],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "i5vcRrDpVcBDJcUa",
+          "name": "Kaggle API"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {},
+      "id": "crm-unzip",
+      "name": "CRM: Unzip",
+      "type": "n8n-nodes-base.compression",
+      "typeVersion": 1,
+      "position": [208, 400],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "binaryPropertyName": "file_1",
+        "options": {}
+      },
+      "id": "crm-parse-csv",
+      "name": "CRM: Parse CSV",
+      "type": "n8n-nodes-base.spreadsheetFile",
+      "typeVersion": 2,
+      "position": [400, 400],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// CRM Normalize (Kaggle data)\nconst results = [];\n\nfor (const item of $input.all()) {\n  try {\n    const r = item.json;\n    if (r.error) continue;\n    \n    const origin = String(r.origin || r.source || '').trim().toLowerCase().replace(/_/g, ' ');\n    if (!origin) continue;\n    \n    results.push({\n      json: {\n        source: 'crm',\n        keyword: origin,\n        landing_page: r.landing_page_id || null,\n        leads: 1,\n        qualified_leads: (r.is_won === 'True' || r.won_date) ? 1 : 0,\n        revenue: Number(r.declared_monthly_revenue || 0) || 0,\n        stage: r.lead_behaviour_profile || 'mql'\n      }\n    });\n  } catch (e) {\n    continue;\n  }\n}\n\nreturn results.slice(0, 300);\n"
+      },
+      "id": "crm-normalize-kaggle",
+      "name": "CRM: Normalize (Kaggle)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [600, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse uploaded/synthetic data\nconst context = $('Parse Input').first().json;\n\nconst adsData = context.ads_data || [];\nconst seoData = context.seo_data || [];\nconst crmData = context.crm_data || [];\n\n// Normalize Ads\nconst ads = adsData.map(r => ({\n  source: 'ads',\n  keyword: String(r.keyword || '').trim().toLowerCase(),\n  campaign: r.campaign || null,\n  impressions: Number(r.impressions) || 0,\n  clicks: Number(r.clicks) || 0,\n  spend: Number(r.spend || r.cost) || 0,\n  conversions: Number(r.conversions) || 0,\n  revenue: Number(r.revenue) || 0,\n  leads: Number(r.leads) || 0\n})).filter(r => r.keyword);\n\n// Normalize SEO\nconst seo = seoData.map(r => ({\n  source: 'seo',\n  keyword: String(r.keyword || r.text || '').trim().toLowerCase(),\n  volume: Number(r.volume || r.vol) || 0,\n  cpc: Number(r.cpc) || 0,\n  competition: r.competition || 'medium',\n  score: Number(r.score) || 0\n})).filter(r => r.keyword);\n\n// Normalize CRM\nconst crm = crmData.map(r => ({\n  source: 'crm',\n  keyword: String(r.origin || r.source || r.keyword || '').trim().toLowerCase(),\n  landing_page: r.landing_page || null,\n  leads: Number(r.leads) || 1,\n  qualified_leads: Number(r.qualified_leads) || 0,\n  revenue: Number(r.revenue) || 0,\n  stage: r.stage || 'mql'\n})).filter(r => r.keyword);\n\nreturn [\n  ...ads.map(json => ({ json })),\n  ...seo.map(json => ({ json })),\n  ...crm.map(json => ({ json }))\n];\n"
+      },
+      "id": "parse-uploaded-data",
+      "name": "Parse Uploaded Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [0, 600]
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "id": "merge-all",
+      "name": "Merge All Data",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [850, 208]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ═══════════════════════════════════════════════════════════════════════════\n// AGGREGATE & CREATE DECISION UNITS\n// ═══════════════════════════════════════════════════════════════════════════\n\nconst context = $('Parse Input').first().json;\nconst allItems = $input.all();\n\nconst keywordMap = new Map();\n\nfor (const item of allItems) {\n  const r = item.json;\n  if (!r.source || !r.keyword) continue;\n  \n  const keyword = r.keyword;\n  \n  if (!keywordMap.has(keyword)) {\n    keywordMap.set(keyword, {\n      keyword,\n      ads: { spend: 0, impressions: 0, clicks: 0, conversions: 0, revenue: 0, campaign: null },\n      seo: { volume: 0, cpc: 0, competition: null, score: 0 },\n      crm: { leads: 0, qualified_leads: 0, revenue: 0 },\n      sources: new Set()\n    });\n  }\n  \n  const unit = keywordMap.get(keyword);\n  unit.sources.add(r.source);\n  \n  if (r.source === 'ads') {\n    unit.ads.spend += r.spend || 0;\n    unit.ads.impressions += r.impressions || 0;\n    unit.ads.clicks += r.clicks || 0;\n    unit.ads.conversions += r.conversions || 0;\n    unit.ads.revenue += r.revenue || 0;\n    unit.ads.campaign = r.campaign || unit.ads.campaign;\n  } else if (r.source === 'seo') {\n    unit.seo.volume = Math.max(unit.seo.volume, r.volume || 0);\n    unit.seo.cpc = r.cpc || unit.seo.cpc;\n    unit.seo.competition = r.competition || unit.seo.competition;\n    unit.seo.score = r.score || unit.seo.score;\n  } else if (r.source === 'crm') {\n    unit.crm.leads += r.leads || 0;\n    unit.crm.qualified_leads += r.qualified_leads || 0;\n    unit.crm.revenue += r.revenue || 0;\n  }\n}\n\n// Calculate derived metrics\nconst decisionUnits = [];\n\nfor (const [keyword, unit] of keywordMap) {\n  const ctr = unit.ads.impressions > 0 ? (unit.ads.clicks / unit.ads.impressions) * 100 : null;\n  const cpl = unit.crm.leads > 0 ? unit.ads.spend / unit.crm.leads : null;\n  const convRate = unit.ads.clicks > 0 ? (unit.ads.conversions / unit.ads.clicks) * 100 : null;\n  const qualRate = unit.crm.leads > 0 ? (unit.crm.qualified_leads / unit.crm.leads) * 100 : null;\n  const roi = unit.ads.spend > 0 ? (unit.crm.revenue + unit.ads.revenue) / unit.ads.spend : null;\n  \n  decisionUnits.push({\n    keyword: unit.keyword,\n    ads: unit.ads,\n    seo: unit.seo,\n    crm: unit.crm,\n    derived: {\n      ctr: ctr ? Math.round(ctr * 100) / 100 : null,\n      cpl: cpl ? Math.round(cpl * 100) / 100 : null,\n      conversion_rate: convRate ? Math.round(convRate * 100) / 100 : null,\n      qualification_rate: qualRate ? Math.round(qualRate * 100) / 100 : null,\n      roi: roi ? Math.round(roi * 100) / 100 : null\n    },\n    sources: Array.from(unit.sources)\n  });\n}\n\ndecisionUnits.sort((a, b) => (b.ads.spend || 0) - (a.ads.spend || 0));\n\nconst stats = {\n  total_units: decisionUnits.length,\n  total_spend: decisionUnits.reduce((sum, u) => sum + (u.ads.spend || 0), 0),\n  total_leads: decisionUnits.reduce((sum, u) => sum + (u.crm.leads || 0), 0),\n  total_revenue: decisionUnits.reduce((sum, u) => sum + (u.crm.revenue || 0) + (u.ads.revenue || 0), 0)\n};\n\nreturn [{ json: { context, stats, decision_units: decisionUnits } }];\n"
+      },
+      "id": "aggregate-data",
+      "name": "Aggregate Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1050, 208]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ═══════════════════════════════════════════════════════════════════════════\n// SCORE SIGNALS (Efficiency, Opportunity, Quality)\n// ═══════════════════════════════════════════════════════════════════════════\n\nconst input = $input.first().json;\nconst decisionUnits = input.decision_units || [];\nconst scoredUnits = [];\n\nfor (const unit of decisionUnits) {\n  // EFFICIENCY SCORE (0-100)\n  let efficiency = 50;\n  const roi = unit.derived.roi || 0;\n  const ctr = unit.derived.ctr || 0;\n  const convRate = unit.derived.conversion_rate || 0;\n  const spend = unit.ads.spend || 0;\n  \n  if (roi >= 5) efficiency += 30;\n  else if (roi >= 3) efficiency += 20;\n  else if (roi >= 2) efficiency += 10;\n  else if (roi > 0 && roi < 0.5) efficiency -= 20;\n  else if (spend > 0 && roi === 0) efficiency -= 25;\n  \n  if (ctr >= 4) efficiency += 10;\n  else if (ctr >= 2) efficiency += 5;\n  else if (ctr < 1 && spend > 0) efficiency -= 10;\n  \n  if (convRate >= 5) efficiency += 10;\n  else if (convRate < 1 && spend > 50) efficiency -= 10;\n  \n  efficiency = Math.max(0, Math.min(100, efficiency));\n  \n  // OPPORTUNITY SCORE (0-100)\n  let opportunity = 50;\n  const seoVolume = unit.seo.volume || 0;\n  const competition = (unit.seo.competition || '').toLowerCase();\n  \n  if (seoVolume >= 50000) opportunity += 25;\n  else if (seoVolume >= 10000) opportunity += 15;\n  else if (seoVolume >= 5000) opportunity += 10;\n  \n  if (seoVolume > 10000 && spend < 100) opportunity += 15;\n  else if (seoVolume > 5000 && spend === 0) opportunity += 20;\n  \n  if (competition === 'low') opportunity += 10;\n  else if (competition === 'high') opportunity -= 5;\n  \n  opportunity = Math.max(0, Math.min(100, opportunity));\n  \n  // QUALITY SCORE (0-100)\n  let quality = 50;\n  const qualRate = unit.derived.qualification_rate || 0;\n  const leads = unit.crm.leads || 0;\n  \n  if (qualRate >= 50) quality += 20;\n  else if (qualRate >= 30) quality += 10;\n  else if (qualRate < 10 && leads > 5) quality -= 15;\n  \n  if (leads >= 10) quality += 10;\n  else if (leads >= 5) quality += 5;\n  \n  quality = Math.max(0, Math.min(100, quality));\n  \n  // COMPOSITE SCORE\n  const composite = Math.round(efficiency * 0.4 + opportunity * 0.3 + quality * 0.3);\n  \n  scoredUnits.push({\n    ...unit,\n    scores: {\n      efficiency: Math.round(efficiency),\n      opportunity: Math.round(opportunity),\n      quality: Math.round(quality),\n      composite\n    }\n  });\n}\n\nreturn [{ json: { ...input, decision_units: scoredUnits } }];\n"
+      },
+      "id": "score-signals",
+      "name": "Score Signals",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1250, 208]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ═══════════════════════════════════════════════════════════════════════════\n// CALCULATE CONFIDENCE SCORES\n// ═══════════════════════════════════════════════════════════════════════════\n\nconst input = $input.first().json;\nconst decisionUnits = input.decision_units || [];\nconst unitsWithConfidence = [];\n\nfor (const unit of decisionUnits) {\n  let score = 0;\n  let maxScore = 100;\n  const factors = [];\n  const warnings = [];\n  \n  // Conversion data (25 pts)\n  const conversions = unit.ads.conversions || 0;\n  if (conversions >= 10) { score += 25; factors.push('Strong conversion data'); }\n  else if (conversions >= 5) { score += 18; factors.push('Good conversion data'); }\n  else if (conversions >= 1) { score += 8; factors.push('Limited conversion data'); }\n  else { warnings.push('No conversion data'); }\n  \n  // CRM data (20 pts)\n  const leads = unit.crm.leads || 0;\n  const qualifiedLeads = unit.crm.qualified_leads || 0;\n  if (qualifiedLeads > 0) { score += 20; factors.push('CRM with qualification'); }\n  else if (leads > 0) { score += 10; factors.push('Basic CRM data'); }\n  else { warnings.push('No CRM data'); }\n  \n  // SEO data (15 pts)\n  const seoVolume = unit.seo.volume || 0;\n  if (seoVolume > 0) { score += 15; factors.push('SEO data available'); }\n  else { warnings.push('No SEO data'); }\n  \n  // Spend level (15 pts)\n  const spend = unit.ads.spend || 0;\n  if (spend >= 200) { score += 15; factors.push('Significant spend data'); }\n  else if (spend >= 50) { score += 10; factors.push('Moderate spend data'); }\n  else if (spend > 0) { score += 5; factors.push('Low spend data'); }\n  \n  // Click volume (15 pts)\n  const clicks = unit.ads.clicks || 0;\n  if (clicks >= 100) { score += 15; factors.push('Strong click volume'); }\n  else if (clicks >= 30) { score += 10; factors.push('Moderate clicks'); }\n  else if (clicks > 0) { score += 5; }\n  \n  // Data freshness (10 pts)\n  score += 10;\n  factors.push('Current data');\n  \n  const confidence = Math.round((score / maxScore) * 100);\n  let level = 'INSUFFICIENT';\n  if (confidence >= 80) level = 'HIGH';\n  else if (confidence >= 60) level = 'MEDIUM';\n  else if (confidence >= 40) level = 'LOW';\n  \n  unitsWithConfidence.push({\n    ...unit,\n    confidence: { score: confidence, level, factors, warnings }\n  });\n}\n\nconst avgConfidence = unitsWithConfidence.length > 0\n  ? Math.round(unitsWithConfidence.reduce((sum, u) => sum + u.confidence.score, 0) / unitsWithConfidence.length)\n  : 0;\n\nreturn [{ json: { ...input, decision_units: unitsWithConfidence, stats: { ...input.stats, avg_confidence: avgConfidence } } }];\n"
+      },
+      "id": "calculate-confidence",
+      "name": "Calculate Confidence",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1450, 208]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ═══════════════════════════════════════════════════════════════════════════\n// CLASSIFY ACTIONS (STOP / FIX / INVEST / OBSERVE)\n// ═══════════════════════════════════════════════════════════════════════════\n\nconst input = $input.first().json;\nconst decisionUnits = input.decision_units || [];\n\nconst stop = [];\nconst fix = [];\nconst invest = [];\nconst observe = [];\n\nfor (const unit of decisionUnits) {\n  const spend = unit.ads.spend || 0;\n  const conversions = unit.ads.conversions || 0;\n  const clicks = unit.ads.clicks || 0;\n  const leads = unit.crm.leads || 0;\n  const qualifiedLeads = unit.crm.qualified_leads || 0;\n  const seoVolume = unit.seo.volume || 0;\n  \n  const efficiency = unit.scores?.efficiency || 0;\n  const opportunity = unit.scores?.opportunity || 0;\n  const confidence = unit.confidence?.score || 0;\n  \n  const roi = unit.derived?.roi || 0;\n  const convRate = unit.derived?.conversion_rate || 0;\n  const ctr = unit.derived?.ctr || 0;\n  const qualRate = unit.derived?.qualification_rate || 0;\n  const cpl = unit.derived?.cpl || 0;\n  \n  let action = null;\n  let priority = 5;\n  let reason = '';\n  let savings = 0;\n  let potential = 0;\n  \n  // INSUFFICIENT DATA → OBSERVE\n  if (confidence < 40) {\n    action = 'OBSERVE';\n    priority = 5;\n    reason = 'Insufficient data for confident recommendation';\n  }\n  // STOP RULES\n  else if (spend > 100 && conversions === 0) {\n    action = 'STOP';\n    priority = 1;\n    reason = `High spend ($${spend.toFixed(0)}) with zero conversions`;\n    savings = spend;\n  }\n  else if (spend > 150 && qualifiedLeads === 0 && leads > 2) {\n    action = 'STOP';\n    priority = 1;\n    reason = `$${spend.toFixed(0)} spent, ${leads} leads but none qualified`;\n    savings = spend;\n  }\n  else if (spend > 100 && roi > 0 && roi < 0.5) {\n    action = 'STOP';\n    priority = 2;\n    reason = `Poor ROI (${roi.toFixed(2)}x) - losing money`;\n    savings = spend * 0.8;\n  }\n  else if (cpl > 100 && leads > 0 && spend > 50) {\n    action = 'STOP';\n    priority = 2;\n    reason = `CPL ($${cpl.toFixed(0)}) unsustainably high`;\n    savings = spend * 0.7;\n  }\n  else if (efficiency < 25 && spend > 100) {\n    action = 'STOP';\n    priority = 3;\n    reason = `Very low efficiency (${efficiency}) with $${spend.toFixed(0)} spend`;\n    savings = spend * 0.6;\n  }\n  // FIX RULES\n  else if (clicks > 50 && convRate < 2 && conversions > 0 && spend > 50) {\n    action = 'FIX';\n    priority = 1;\n    reason = `Strong traffic (${clicks} clicks) but low conversion (${convRate.toFixed(1)}%)`;\n    potential = spend * 0.4;\n  }\n  else if (leads > 5 && qualRate < 20 && qualRate > 0) {\n    action = 'FIX';\n    priority = 1;\n    reason = `${leads} leads but only ${qualRate.toFixed(0)}% qualify - targeting issue`;\n    potential = spend * 0.35;\n  }\n  else if (ctr < 1.5 && spend > 50 && (unit.ads.impressions || 0) > 1000) {\n    action = 'FIX';\n    priority = 2;\n    reason = `Low CTR (${ctr.toFixed(1)}%) - ad copy needs work`;\n    potential = spend * 0.25;\n  }\n  else if (efficiency >= 30 && efficiency < 55 && opportunity > 65 && spend > 30) {\n    action = 'FIX';\n    priority = 2;\n    reason = 'Good opportunity but efficiency needs work';\n    potential = spend * 0.3;\n  }\n  // INVEST RULES\n  else if (roi >= 5 && spend > 30) {\n    action = 'INVEST';\n    priority = 1;\n    reason = `Exceptional ROI (${roi.toFixed(1)}x) - scale immediately`;\n    potential = spend * (roi - 1);\n  }\n  else if (seoVolume > 10000 && spend < 50) {\n    action = 'INVEST';\n    priority = 1;\n    reason = `High demand (${(seoVolume/1000).toFixed(0)}K/mo) with minimal ad presence`;\n    potential = Math.min(seoVolume * 0.01, 500);\n  }\n  else if (roi >= 3 && efficiency > 60 && spend < 500) {\n    action = 'INVEST';\n    priority = 2;\n    reason = `Strong ROI (${roi.toFixed(1)}x) with room to scale`;\n    potential = spend * 1.5;\n  }\n  else if (efficiency > 70 && opportunity > 50) {\n    action = 'INVEST';\n    priority = 3;\n    reason = 'High efficiency with growth opportunity';\n    potential = spend * 0.8;\n  }\n  // OBSERVE (default)\n  else if (spend < 50 && clicks < 30) {\n    action = 'OBSERVE';\n    priority = 4;\n    reason = 'New keyword - gathering data';\n  }\n  else {\n    action = 'OBSERVE';\n    priority = 5;\n    reason = 'Stable performance - continue monitoring';\n  }\n  \n  const classified = {\n    ...unit,\n    classification: { action, priority, reason, savings: Math.round(savings), potential: Math.round(potential) }\n  };\n  \n  if (action === 'STOP') stop.push(classified);\n  else if (action === 'FIX') fix.push(classified);\n  else if (action === 'INVEST') invest.push(classified);\n  else observe.push(classified);\n}\n\n// Sort by priority\nconst sortByPriority = (a, b) => a.classification.priority - b.classification.priority;\nstop.sort(sortByPriority);\nfix.sort(sortByPriority);\ninvest.sort(sortByPriority);\nobserve.sort(sortByPriority);\n\nconst totalSavings = stop.reduce((sum, u) => sum + u.classification.savings, 0);\nconst totalPotential = invest.reduce((sum, u) => sum + u.classification.potential, 0) + fix.reduce((sum, u) => sum + u.classification.potential, 0);\n\nreturn [{\n  json: {\n    context: input.context,\n    stats: { ...input.stats, total_savings: totalSavings, total_potential: totalPotential, annual_savings: totalSavings * 12 },\n    summary: { stop: stop.length, fix: fix.length, invest: invest.length, observe: observe.length, total_savings: totalSavings, avg_confidence: input.stats.avg_confidence },\n    recommendations: { stop, fix, invest, observe }\n  }\n}];\n"
+      },
+      "id": "classify-actions",
+      "name": "Classify Actions",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1650, 208]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-4o-mini\",\n  \"max_tokens\": 500,\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are a marketing analytics expert. Analyze the data and provide a concise executive summary (3-4 sentences) highlighting the most important findings and recommended actions. Be specific with numbers. Focus on: 1) Biggest waste of money, 2) Best opportunity, 3) Quick wins.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Marketing Analysis Summary:\\n\\nSTOP (pause these): {{ $json.summary.stop }} keywords wasting ${{ $json.stats.total_savings }}/month\\nFIX (optimize): {{ $json.summary.fix }} keywords\\nINVEST (scale): {{ $json.summary.invest }} keywords\\nOBSERVE: {{ $json.summary.observe }} keywords\\n\\nTop STOP keywords: {{ $json.recommendations.stop.slice(0,3).map(k => k.keyword + ' ($' + k.ads.spend + ')').join(', ') }}\\nTop INVEST keywords: {{ $json.recommendations.invest.slice(0,3).map(k => k.keyword + ' (ROI: ' + (k.derived.roi || 0) + 'x)').join(', ') }}\\n\\nTotal spend analyzed: ${{ $json.stats.total_spend }}\\nAverage confidence: {{ $json.stats.avg_confidence }}%\\n\\nProvide a brief executive summary.\"\n    }\n  ]\n}"
+      },
+      "id": "openai-insights",
+      "name": "AI: Generate Insights",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1850, 208],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "openai-header",
+          "name": "OpenAI API"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse OpenAI response and build final output\nconst classifyData = $('Classify Actions').first().json;\nconst aiResponse = $input.first().json;\n\nlet aiInsight = 'AI analysis unavailable. Based on the data, focus on pausing underperforming keywords and scaling high-ROI opportunities.';\n\ntry {\n  if (aiResponse.choices && aiResponse.choices[0]?.message?.content) {\n    aiInsight = aiResponse.choices[0].message.content;\n  }\n} catch (e) {\n  // Use fallback\n}\n\nreturn [{\n  json: {\n    success: true,\n    generated_at: classifyData.context.generated_at,\n    mode: classifyData.context.mode,\n    goal: classifyData.context.goal,\n    budget: classifyData.context.budget,\n    stats: classifyData.stats,\n    summary: classifyData.summary,\n    ai_insight: aiInsight,\n    recommendations: classifyData.recommendations\n  }\n}];\n"
+      },
+      "id": "build-response",
+      "name": "Build Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2050, 208]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "respond-webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [2250, 208]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [[{ "node": "Parse Input", "type": "main", "index": 0 }]]
+    },
+    "Parse Input": {
+      "main": [[{ "node": "Mode Router", "type": "main", "index": 0 }]]
+    },
+    "Mode Router": {
+      "main": [
+        [
+          { "node": "Ads: Download", "type": "main", "index": 0 },
+          { "node": "SEO: Download", "type": "main", "index": 0 },
+          { "node": "CRM: Download", "type": "main", "index": 0 }
+        ],
+        [{ "node": "Parse Uploaded Data", "type": "main", "index": 0 }]
+      ]
+    },
+    "Ads: Download": {
+      "main": [[{ "node": "Ads: Unzip", "type": "main", "index": 0 }]]
+    },
+    "Ads: Unzip": {
+      "main": [[{ "node": "Ads: Parse CSV", "type": "main", "index": 0 }]]
+    },
+    "Ads: Parse CSV": {
+      "main": [[{ "node": "Ads: Normalize (Kaggle)", "type": "main", "index": 0 }]]
+    },
+    "Ads: Normalize (Kaggle)": {
+      "main": [[{ "node": "Merge All Data", "type": "main", "index": 0 }]]
+    },
+    "SEO: Download": {
+      "main": [[{ "node": "SEO: Unzip", "type": "main", "index": 0 }]]
+    },
+    "SEO: Unzip": {
+      "main": [[{ "node": "SEO: Parse CSV", "type": "main", "index": 0 }]]
+    },
+    "SEO: Parse CSV": {
+      "main": [[{ "node": "SEO: Normalize (Kaggle)", "type": "main", "index": 0 }]]
+    },
+    "SEO: Normalize (Kaggle)": {
+      "main": [[{ "node": "Merge All Data", "type": "main", "index": 1 }]]
+    },
+    "CRM: Download": {
+      "main": [[{ "node": "CRM: Unzip", "type": "main", "index": 0 }]]
+    },
+    "CRM: Unzip": {
+      "main": [[{ "node": "CRM: Parse CSV", "type": "main", "index": 0 }]]
+    },
+    "CRM: Parse CSV": {
+      "main": [[{ "node": "CRM: Normalize (Kaggle)", "type": "main", "index": 0 }]]
+    },
+    "CRM: Normalize (Kaggle)": {
+      "main": [[{ "node": "Merge All Data", "type": "main", "index": 2 }]]
+    },
+    "Parse Uploaded Data": {
+      "main": [[{ "node": "Merge All Data", "type": "main", "index": 3 }]]
+    },
+    "Merge All Data": {
+      "main": [[{ "node": "Aggregate Data", "type": "main", "index": 0 }]]
+    },
+    "Aggregate Data": {
+      "main": [[{ "node": "Score Signals", "type": "main", "index": 0 }]]
+    },
+    "Score Signals": {
+      "main": [[{ "node": "Calculate Confidence", "type": "main", "index": 0 }]]
+    },
+    "Calculate Confidence": {
+      "main": [[{ "node": "Classify Actions", "type": "main", "index": 0 }]]
+    },
+    "Classify Actions": {
+      "main": [[{ "node": "AI: Generate Insights", "type": "main", "index": 0 }]]
+    },
+    "AI: Generate Insights": {
+      "main": [[{ "node": "Build Response", "type": "main", "index": 0 }]]
+    },
+    "Build Response": {
+      "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
