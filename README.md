@@ -14,7 +14,6 @@ AI-powered marketing intelligence that tells you exactly what to **STOP**, **FIX
 - **🌐 Live Demo** - Real-time data from Kaggle public datasets (~45-60 seconds)
 - **📁 Upload Mode** - Analyze your own marketing data
 - **📥 PDF Reports** - Download professional reports
-- **📧 Email Reports** - Get reports delivered to your inbox
 - **🔌 Integrations** - Coming soon: Google Ads, Salesforce, HubSpot, and more
 
 ## 🎯 How It Works
