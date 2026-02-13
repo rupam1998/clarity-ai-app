@@ -9,6 +9,7 @@ AI-powered marketing intelligence that tells you exactly what to **STOP**, **FIX
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.30+-red)
 
 Try Clarity AI: https://clarity-ai-app-hrcqzinzokrjvm2he3dckp.streamlit.app/
+
 Demo Video: https://www.loom.com/share/6a21ed54326748b3aca2a591c2b063f8
 ## 🚀 Features
 
