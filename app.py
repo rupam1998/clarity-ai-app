@@ -12,7 +12,6 @@ from datetime import datetime
 from io import BytesIO
 import os
 
-# Page configuration
 st.set_page_config(
     page_title="Clarity AI - Marketing Intelligence",
     page_icon="🎯",
@@ -20,7 +19,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Professional CSS — forced light theme for consistent product look
+# ===== DARK THEME CSS =====
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@400;500&display=swap');
@@ -29,11 +28,11 @@ st.markdown("""
     footer {visibility: hidden;}
     header {visibility: hidden;}
 
-    /* Force light background globally */
-    .stApp, .main, section[data-testid="stSidebar"],
-    .block-container, [data-testid="stAppViewContainer"] {
-        background-color: #f8fafc !important;
-        color: #1e293b !important;
+    /* ── Dark base ── */
+    .stApp, .main, .block-container,
+    [data-testid="stAppViewContainer"],
+    section[data-testid="stSidebar"] {
+        background-color: #0b1120 !important;
     }
 
     .main { padding: 0rem 1rem; }
@@ -41,105 +40,111 @@ st.markdown("""
     * { font-family: 'DM Sans', sans-serif !important; }
     code, pre, .stCode { font-family: 'JetBrains Mono', monospace !important; }
 
-    /* Force all Streamlit text elements to dark text */
+    /* ── Global text → light ── */
     .stMarkdown, .stMarkdown p, .stMarkdown li, .stMarkdown span,
     .stText, p, span, li, label, h1, h2, h3, h4, h5, h6,
-    div[data-testid="stText"], .stRadio label, .stCheckbox label,
-    .stSelectbox label, .stNumberInput label,
+    div[data-testid="stText"],
     [data-testid="stWidgetLabel"] label,
-    [data-testid="stWidgetLabel"] p {
-        color: #1e293b !important;
+    [data-testid="stWidgetLabel"] p,
+    .stRadio label, .stCheckbox label {
+        color: #e2e8f0 !important;
     }
 
-    /* Force expander text */
-    .streamlit-expanderHeader, .streamlit-expanderHeader p,
-    [data-testid="stExpander"] summary span,
+    /* ── Expander ── */
+    [data-testid="stExpander"] { border-color: #1e293b !important; }
+    [data-testid="stExpander"] summary span { color: #cbd5e1 !important; }
     [data-testid="stExpander"] div p,
-    [data-testid="stExpander"] div li {
-        color: #334155 !important;
-    }
+    [data-testid="stExpander"] div li { color: #94a3b8 !important; }
 
-    /* Force tab text */
-    .stTabs [data-baseweb="tab"] {
-        color: #64748b !important;
-    }
-    .stTabs [aria-selected="true"] {
-        color: #1e4d8a !important;
-    }
-
-    /* Force metric text */
-    div[data-testid="stMetric"] label,
-    div[data-testid="stMetric"] [data-testid="stMetricValue"],
-    div[data-testid="stMetric"] [data-testid="stMetricDelta"] {
-        color: #1e293b !important;
-    }
-
-    /* Force info/success/warning/error text */
+    /* ── Alert boxes ── */
     .stAlert p { color: inherit !important; }
 
+    /* ── Color tokens ── */
     :root {
-        --brand-900: #0c1e35; --brand-800: #122b4a; --brand-700: #1a3d6b;
-        --brand-600: #1e4d8a; --brand-500: #2563eb; --brand-400: #5b8def;
-        --brand-300: #93b4f6; --brand-200: #c5d9fc; --brand-100: #e8f0fe; --brand-50: #f4f8ff;
-        --accent: #f59e0b; --accent-light: #fef3c7;
-        --success: #059669; --success-light: #d1fae5;
-        --danger: #dc2626; --danger-light: #fee2e2;
-        --warning: #d97706; --warning-light: #fef3c7;
-        --text-primary: #1e293b; --text-secondary: #475569; --text-muted: #94a3b8;
-        --border: #e2e8f0; --surface: #ffffff; --bg: #f8fafc;
-        --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px;
-        --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
-        --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
-        --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+        --bg-base: #0b1120;
+        --bg-card: #111827;
+        --bg-elevated: #1a2332;
+        --bg-input: #1e293b;
+        --border: #1e293b;
+        --border-hover: #334155;
+        --text-primary: #f1f5f9;
+        --text-secondary: #cbd5e1;
+        --text-muted: #64748b;
+        --brand-500: #3b82f6;
+        --brand-400: #60a5fa;
+        --brand-300: #93c5fd;
+        --brand-200: #bfdbfe;
+        --brand-glow: rgba(59,130,246,0.15);
+        --accent: #f59e0b;
+        --success: #34d399;
+        --success-dim: rgba(52,211,153,0.12);
+        --danger: #f87171;
+        --danger-dim: rgba(248,113,113,0.12);
+        --warning: #fbbf24;
+        --warning-dim: rgba(251,191,36,0.12);
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+        --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+        --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+        --shadow-glow: 0 0 20px rgba(59,130,246,0.08);
     }
 
+    /* ── Navbar ── */
     .clarity-nav {
         display: flex; align-items: center; justify-content: space-between;
-        padding: 1rem 2rem; background: var(--brand-900); border-radius: var(--radius-lg);
-        margin-bottom: 1.5rem; box-shadow: var(--shadow-lg);
+        padding: 1rem 2rem;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        border: 1px solid #1e293b;
+        border-radius: var(--radius-lg);
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-md), var(--shadow-glow);
         position: relative; overflow: hidden;
     }
     .clarity-nav::before {
-        content: ''; position: absolute; top: -50%; right: -10%;
-        width: 300px; height: 300px;
-        background: radial-gradient(circle, rgba(37,99,235,0.15) 0%, transparent 70%);
+        content: ''; position: absolute; top: -60%; right: -5%;
+        width: 350px; height: 350px;
+        background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%);
         pointer-events: none;
     }
     .clarity-nav .brand { display: flex; align-items: center; gap: 12px; }
     .clarity-nav .brand-icon {
         width: 40px; height: 40px;
-        background: linear-gradient(135deg, var(--brand-500), var(--brand-400));
+        background: linear-gradient(135deg, #3b82f6, #60a5fa);
         border-radius: 10px; display: flex; align-items: center; justify-content: center;
-        font-size: 1.2rem; box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+        font-size: 1.2rem; box-shadow: 0 2px 10px rgba(59,130,246,0.4);
     }
-    .clarity-nav .brand-name { font-size: 1.35rem; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
+    .clarity-nav .brand-name { font-size: 1.35rem; font-weight: 700; color: #ffffff !important; letter-spacing: -0.5px; }
     .clarity-nav .brand-tag {
-        font-size: 0.7rem; font-weight: 600; color: var(--accent);
-        background: rgba(245,158,11,0.15); padding: 3px 10px; border-radius: 20px;
-        letter-spacing: 0.5px; border: 1px solid rgba(245,158,11,0.25);
+        font-size: 0.7rem; font-weight: 600; color: #fbbf24 !important;
+        background: rgba(251,191,36,0.12); padding: 3px 10px; border-radius: 20px;
+        letter-spacing: 0.5px; border: 1px solid rgba(251,191,36,0.2);
     }
-    .clarity-nav .tagline { color: var(--brand-300); font-size: 0.85rem; font-weight: 500; }
+    .clarity-nav .tagline { color: #94a3b8 !important; font-size: 0.85rem; font-weight: 500; }
 
+    /* ── Tabs ── */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 4px; background: #f1f5f9; padding: 4px;
-        border-radius: var(--radius-md); border: 1px solid #e2e8f0;
+        gap: 4px; background: var(--bg-card); padding: 5px;
+        border-radius: var(--radius-md); border: 1px solid var(--border);
     }
     .stTabs [data-baseweb="tab"] {
         padding: 10px 20px; border-radius: var(--radius-sm); font-weight: 600;
         font-size: 0.85rem; color: #64748b !important; background: transparent; border: none;
     }
-    .stTabs [data-baseweb="tab"]:hover { color: #1a3d6b !important; background: rgba(37,99,235,0.05); }
+    .stTabs [data-baseweb="tab"]:hover { color: #cbd5e1 !important; background: rgba(255,255,255,0.03); }
     .stTabs [aria-selected="true"] {
-        background: #ffffff !important; color: #1e4d8a !important; box-shadow: var(--shadow-sm);
+        background: var(--bg-elevated) !important; color: #60a5fa !important;
+        box-shadow: var(--shadow-sm); border: 1px solid var(--border) !important;
     }
     .stTabs [data-baseweb="tab-highlight"], .stTabs [data-baseweb="tab-border"] { display: none; }
 
+    /* ── Demo cards ── */
     .demo-card {
-        background: #ffffff; border: 1px solid #e2e8f0;
+        background: var(--bg-card); border: 1px solid var(--border);
         border-radius: var(--radius-lg); padding: 2rem; height: 100%;
         transition: all 0.3s ease; overflow: hidden;
     }
-    .demo-card:hover { box-shadow: var(--shadow-md); border-color: #93b4f6; transform: translateY(-2px); }
+    .demo-card:hover { box-shadow: var(--shadow-md); border-color: var(--border-hover); transform: translateY(-2px); }
     .demo-card.quick { border-top: 3px solid var(--brand-500); }
     .demo-card.live { border-top: 3px solid var(--success); }
     .demo-card .card-badge {
@@ -147,155 +152,182 @@ st.markdown("""
         border-radius: 20px; font-size: 0.72rem; font-weight: 600;
         letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 1rem;
     }
-    .demo-card.quick .card-badge { background: var(--brand-100); color: var(--brand-700); }
-    .demo-card.live .card-badge { background: var(--success-light); color: var(--success); }
-    .demo-card h3 { font-size: 1.25rem; font-weight: 700; color: #1e293b !important; margin: 0 0 0.5rem 0; }
-    .demo-card .card-desc { color: #64748b !important; font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.25rem; }
+    .demo-card.quick .card-badge { background: rgba(59,130,246,0.12); color: #60a5fa !important; }
+    .demo-card.live .card-badge { background: var(--success-dim); color: var(--success) !important; }
+    .demo-card h3 { font-size: 1.25rem; font-weight: 700; color: #f1f5f9 !important; margin: 0 0 0.5rem 0; }
+    .demo-card .card-desc { color: #94a3b8 !important; font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.25rem; }
     .demo-card .specs { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1rem; }
-    .demo-card .spec-item { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: #334155 !important; }
+    .demo-card .spec-item { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: #cbd5e1 !important; }
     .demo-card .spec-icon {
         width: 28px; height: 28px; border-radius: 8px;
         display: flex; align-items: center; justify-content: center; font-size: 0.75rem; flex-shrink: 0;
     }
-    .demo-card.quick .spec-icon { background: var(--brand-100); color: var(--brand-600); }
-    .demo-card.live .spec-icon { background: var(--success-light); color: var(--success); }
+    .demo-card.quick .spec-icon { background: rgba(59,130,246,0.1); }
+    .demo-card.live .spec-icon { background: var(--success-dim); }
     .demo-card .card-footer {
-        font-size: 0.78rem; color: #94a3b8 !important; font-style: italic;
-        padding-top: 0.75rem; border-top: 1px solid #f1f5f9;
+        font-size: 0.78rem; color: #475569 !important; font-style: italic;
+        padding-top: 0.75rem; border-top: 1px solid #1e293b;
     }
 
+    /* ── Section headers ── */
     .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 0.25rem; }
     .section-header .icon-box {
         width: 36px; height: 36px; border-radius: 10px;
         display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;
     }
-    .section-header h2 { font-size: 1.4rem; font-weight: 700; color: #1e293b !important; margin: 0; }
-    .section-subtitle { color: #64748b !important; font-size: 0.9rem; margin-bottom: 1.5rem; line-height: 1.5; }
+    .section-header h2 { font-size: 1.4rem; font-weight: 700; color: #f1f5f9 !important; margin: 0; }
+    .section-subtitle { color: #94a3b8 !important; font-size: 0.9rem; margin-bottom: 1.5rem; line-height: 1.5; }
 
+    /* ── AI insight box ── */
     .ai-insight-box-pro {
-        background: linear-gradient(135deg, var(--brand-50) 0%, #f0f7ff 100%);
-        border: 1px solid var(--brand-200); border-radius: var(--radius-lg);
+        background: linear-gradient(135deg, rgba(59,130,246,0.06) 0%, rgba(59,130,246,0.02) 100%);
+        border: 1px solid rgba(59,130,246,0.2); border-radius: var(--radius-lg);
         padding: 1.5rem 2rem; margin: 1.5rem 0; position: relative;
     }
     .ai-insight-box-pro::before {
         content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-        background: linear-gradient(90deg, var(--brand-500), var(--brand-400), var(--accent));
+        background: linear-gradient(90deg, #3b82f6, #60a5fa, #fbbf24);
         border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     }
     .ai-insight-box-pro .insight-header {
         display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600;
-        color: var(--brand-700); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;
+        color: #60a5fa !important; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;
     }
 
+    /* ── Rec headers ── */
     .rec-header {
         display: flex; align-items: center; gap: 10px; padding: 0.75rem 1rem;
         border-radius: var(--radius-sm); margin-bottom: 1rem; font-weight: 600; font-size: 0.85rem;
     }
-    .rec-header.stop { background: var(--danger-light); color: var(--danger); }
-    .rec-header.fix { background: var(--warning-light); color: var(--warning); }
-    .rec-header.invest { background: var(--success-light); color: var(--success); }
-    .rec-header.observe { background: #f1f5f9; color: #64748b !important; }
+    .rec-header.stop { background: var(--danger-dim); color: var(--danger) !important; }
+    .rec-header.fix { background: var(--warning-dim); color: var(--warning) !important; }
+    .rec-header.invest { background: var(--success-dim); color: var(--success) !important; }
+    .rec-header.observe { background: rgba(100,116,139,0.1); color: #94a3b8 !important; }
 
+    /* ── Integration cards ── */
     .int-card {
-        background: #ffffff; border: 1px solid #e2e8f0;
+        background: var(--bg-card); border: 1px solid var(--border);
         border-radius: var(--radius-md); padding: 1.5rem 1rem; text-align: center;
+        transition: all 0.2s ease;
     }
-    .int-card:hover { box-shadow: var(--shadow-sm); }
+    .int-card:hover { border-color: var(--border-hover); box-shadow: var(--shadow-sm); }
     .int-card .int-icon { font-size: 2rem; margin-bottom: 0.5rem; }
-    .int-card .int-name { font-weight: 600; font-size: 0.9rem; color: #1e293b !important; margin-bottom: 0.5rem; }
+    .int-card .int-name { font-weight: 600; font-size: 0.9rem; color: #e2e8f0 !important; margin-bottom: 0.5rem; }
     .int-card .int-badge {
-        display: inline-block; background: #f1f5f9; color: #64748b !important;
+        display: inline-block; background: rgba(100,116,139,0.12); color: #64748b !important;
         padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 600;
     }
 
+    /* ── Coming soon ── */
     .coming-soon-banner {
-        background: linear-gradient(135deg, #e8f0fe, #f4f8ff);
-        border: 1px solid #c5d9fc; border-radius: var(--radius-lg);
+        background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(59,130,246,0.03));
+        border: 1px solid rgba(59,130,246,0.2); border-radius: var(--radius-lg);
         padding: 2rem; text-align: center; margin-bottom: 2rem;
     }
     .coming-soon-banner .cs-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
-    .coming-soon-banner h3 { font-size: 1.3rem; font-weight: 700; color: #122b4a !important; margin: 0 0 0.5rem 0; }
-    .coming-soon-banner p { color: #64748b !important; font-size: 0.9rem; max-width: 500px; margin: 0 auto; line-height: 1.5; }
+    .coming-soon-banner h3 { font-size: 1.3rem; font-weight: 700; color: #e2e8f0 !important; margin: 0 0 0.5rem 0; }
+    .coming-soon-banner p { color: #94a3b8 !important; font-size: 0.9rem; max-width: 500px; margin: 0 auto; line-height: 1.5; }
 
-    .upload-header { display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 0.9rem; color: #1e293b !important; margin-bottom: 0.25rem; }
-    .upload-header .req-badge { font-size: 0.65rem; background: var(--danger-light); color: var(--danger); padding: 2px 8px; border-radius: 4px; font-weight: 600; text-transform: uppercase; }
-    .upload-header .opt-badge { font-size: 0.65rem; background: var(--neutral-100); color: var(--neutral-500); padding: 2px 8px; border-radius: 4px; font-weight: 600; text-transform: uppercase; }
-    .upload-source { font-size: 0.8rem; color: #94a3b8 !important; margin-bottom: 0.75rem; }
+    /* ── Upload headers ── */
+    .upload-header { display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 0.9rem; color: #e2e8f0 !important; margin-bottom: 0.25rem; }
+    .upload-header .req-badge { font-size: 0.65rem; background: var(--danger-dim); color: var(--danger) !important; padding: 2px 8px; border-radius: 4px; font-weight: 600; text-transform: uppercase; }
+    .upload-header .opt-badge { font-size: 0.65rem; background: rgba(100,116,139,0.12); color: #64748b !important; padding: 2px 8px; border-radius: 4px; font-weight: 600; text-transform: uppercase; }
+    .upload-source { font-size: 0.8rem; color: #64748b !important; margin-bottom: 0.75rem; }
 
+    /* ── Info box ── */
     .info-box {
-        display: flex; align-items: center; gap: 10px; background: var(--brand-50);
-        border: 1px solid var(--brand-200); border-radius: var(--radius-sm);
-        padding: 0.75rem 1rem; font-size: 0.85rem; color: var(--brand-700); margin-bottom: 1.5rem;
+        display: flex; align-items: center; gap: 10px;
+        background: rgba(59,130,246,0.06); border: 1px solid rgba(59,130,246,0.15);
+        border-radius: var(--radius-sm); padding: 0.75rem 1rem;
+        font-size: 0.85rem; color: #93c5fd !important; margin-bottom: 1.5rem;
     }
 
+    /* ── About cards ── */
     .about-card {
-        background: #ffffff; border: 1px solid #e2e8f0;
+        background: var(--bg-card); border: 1px solid var(--border);
         border-radius: var(--radius-lg); padding: 2rem; height: 100%;
     }
-    .about-card h4 { font-size: 1.1rem; font-weight: 700; color: #1e293b !important; margin: 0 0 1rem 0; }
-    .about-card p, .about-card li { color: #475569 !important; font-size: 0.9rem; line-height: 1.7; }
+    .about-card h4 { font-size: 1.1rem; font-weight: 700; color: #f1f5f9 !important; margin: 0 0 1rem 0; }
+    .about-card p, .about-card li { color: #94a3b8 !important; font-size: 0.9rem; line-height: 1.7; }
+    .about-card strong { color: #cbd5e1 !important; }
+    .about-card hr { border-color: #1e293b !important; }
 
+    /* ── Author card ── */
     .author-card {
-        background: linear-gradient(135deg, var(--brand-900), var(--brand-700));
-        border-radius: var(--radius-lg); padding: 2rem; color: white;
-        display: flex; align-items: center; gap: 1.5rem;
+        background: linear-gradient(135deg, #0f172a, #1a2332);
+        border: 1px solid var(--border); border-radius: var(--radius-lg);
+        padding: 2rem; display: flex; align-items: center; gap: 1.5rem;
     }
     .author-card .avatar {
         width: 72px; height: 72px;
-        background: linear-gradient(135deg, var(--brand-500), var(--brand-400));
+        background: linear-gradient(135deg, #3b82f6, #60a5fa);
         border-radius: 16px; display: flex; align-items: center; justify-content: center;
-        font-size: 1.5rem; font-weight: 700; flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        font-size: 1.5rem; font-weight: 700; color: white !important;
+        flex-shrink: 0; box-shadow: 0 4px 16px rgba(59,130,246,0.3);
     }
-    .author-card .author-info h4 { color: white; font-size: 1.1rem; margin: 0 0 4px 0; }
-    .author-card .author-info p { color: var(--brand-300); font-size: 0.85rem; margin: 0; line-height: 1.5; }
-    .author-card .author-info a { color: var(--brand-300); text-decoration: underline; }
+    .author-card .author-info h4 { color: #f1f5f9 !important; font-size: 1.1rem; margin: 0 0 4px 0; }
+    .author-card .author-info p { color: #94a3b8 !important; font-size: 0.85rem; margin: 0; line-height: 1.5; }
+    .author-card .author-info a { color: #60a5fa !important; text-decoration: underline; }
 
+    /* ── Buttons ── */
     .stButton>button {
         border-radius: var(--radius-sm); font-weight: 600; padding: 0.6rem 1.5rem;
-        font-size: 0.85rem; border: 1px solid #e2e8f0; transition: all 0.2s ease;
-        color: #1e293b !important; background: #ffffff;
+        font-size: 0.85rem; border: 1px solid var(--border); transition: all 0.2s ease;
+        color: #e2e8f0 !important; background: var(--bg-elevated);
     }
-    .stButton>button:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
-    .stButton>button[kind="primary"] { background: linear-gradient(135deg, var(--brand-600), var(--brand-500)); color: white; border: none; }
+    .stButton>button:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); border-color: var(--border-hover); background: #243044; }
+    .stButton>button[kind="primary"] {
+        background: linear-gradient(135deg, #2563eb, #3b82f6) !important;
+        color: white !important; border: none !important;
+        box-shadow: 0 2px 12px rgba(59,130,246,0.3);
+    }
+    .stButton>button[kind="primary"]:hover { box-shadow: 0 4px 20px rgba(59,130,246,0.4); }
 
+    /* ── Pills ── */
     .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 500; }
-    .status-pill.ok { background: #d1fae5; color: #059669 !important; }
-    .status-pill.pending { background: #f1f5f9; color: #94a3b8 !important; }
+    .status-pill.ok { background: var(--success-dim); color: var(--success) !important; }
+    .status-pill.pending { background: rgba(100,116,139,0.1); color: #64748b !important; }
 
-    .divider { border: none; border-top: 1px solid #e2e8f0; margin: 1.5rem 0; }
+    /* ── Misc ── */
+    .divider { border: none; border-top: 1px solid #1e293b; margin: 1.5rem 0; }
     .settings-label { font-size: 0.75rem; font-weight: 600; color: #64748b !important; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; }
-    .app-footer { text-align: center; padding: 2rem 0 1rem; color: #94a3b8 !important; font-size: 0.78rem; border-top: 1px solid #e2e8f0; margin-top: 2rem; }
+    .app-footer { text-align: center; padding: 2rem 0 1rem; color: #475569 !important; font-size: 0.78rem; border-top: 1px solid #1e293b; margin-top: 2rem; }
 
-    .stSelectbox label, .stNumberInput label { font-size: 0.85rem !important; font-weight: 600 !important; color: #475569 !important; }
+    /* ── Streamlit widget overrides for dark ── */
+    .stSelectbox label, .stNumberInput label, .stTextInput label, .stTextArea label {
+        font-size: 0.85rem !important; font-weight: 600 !important; color: #cbd5e1 !important;
+    }
     .stDataFrame { border-radius: var(--radius-md); overflow: hidden; }
-    div[data-testid="stMetric"] { background: #ffffff; border: 1px solid #e2e8f0; border-radius: var(--radius-md); padding: 1rem; box-shadow: var(--shadow-sm); }
+
+    div[data-testid="stMetric"] {
+        background: var(--bg-card) !important; border: 1px solid var(--border);
+        border-radius: var(--radius-md); padding: 1rem; box-shadow: var(--shadow-sm);
+    }
     div[data-testid="stMetric"] label { font-size: 0.75rem !important; text-transform: uppercase; letter-spacing: 0.3px; color: #64748b !important; }
-    div[data-testid="stMetric"] [data-testid="stMetricValue"] { color: #1e293b !important; }
+    div[data-testid="stMetric"] [data-testid="stMetricValue"] { color: #f1f5f9 !important; }
     .stDownloadButton>button { width: 100%; }
 
-    /* Force Streamlit inputs to light theme */
-    .stSelectbox > div > div,
-    .stNumberInput > div > div > input,
-    .stTextInput > div > div > input,
-    .stTextArea > div > div > textarea,
-    [data-baseweb="select"] > div,
-    [data-baseweb="input"] > div {
-        background-color: #ffffff !important;
-        color: #1e293b !important;
-        border-color: #e2e8f0 !important;
-    }
+    /* Inputs */
+    [data-baseweb="select"] > div { background-color: var(--bg-input) !important; border-color: var(--border) !important; color: #e2e8f0 !important; }
+    [data-baseweb="input"] { background-color: var(--bg-input) !important; border-color: var(--border) !important; }
+    [data-baseweb="input"] input { color: #e2e8f0 !important; }
+    [data-baseweb="textarea"] textarea { background-color: var(--bg-input) !important; color: #e2e8f0 !important; border-color: var(--border) !important; }
 
-    /* Fix file uploader */
-    [data-testid="stFileUploader"] {
-        background-color: #ffffff !important;
-        border-color: #e2e8f0 !important;
+    /* File uploader */
+    [data-testid="stFileUploader"] section { background-color: var(--bg-card) !important; border-color: var(--border) !important; }
+    [data-testid="stFileUploader"] small { color: #64748b !important; }
+    [data-testid="stFileUploader"] button { color: #e2e8f0 !important; background: var(--bg-elevated) !important; border-color: var(--border) !important; }
+
+    /* Dataframe */
+    .stDataFrame [data-testid="stDataFrameResizable"] { background: var(--bg-card) !important; }
+
+    /* Empty state */
+    .empty-state {
+        text-align: center; padding: 4rem 2rem;
     }
-    [data-testid="stFileUploader"] section {
-        background-color: #ffffff !important;
-    }
-    [data-testid="stFileUploader"] small {
-        color: #64748b !important;
-    }
+    .empty-state .es-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.6; }
+    .empty-state h3 { color: #cbd5e1 !important; margin-bottom: 0.5rem; }
+    .empty-state p { color: #64748b !important; font-size: 0.9rem; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -464,7 +496,7 @@ def render_hero():
 def render_demo_tab():
     st.markdown("""
     <div class="section-header">
-        <div class="icon-box" style="background: #e8f0fe; color: #2563eb;">🎮</div>
+        <div class="icon-box" style="background: rgba(59,130,246,0.1);">🎮</div>
         <h2>Try Clarity AI with Demo Data</h2>
     </div>
     <p class="section-subtitle">Experience the full power of Clarity AI. No signup required — pick a demo mode and see AI-powered recommendations in action.</p>
@@ -514,31 +546,31 @@ def render_demo_tab():
 def render_upload_tab():
     st.markdown("""
     <div class="section-header">
-        <div class="icon-box" style="background: #fef3c7; color: #d97706;">📁</div>
+        <div class="icon-box" style="background: rgba(251,191,36,0.1);">📁</div>
         <h2>Upload Your Marketing Data</h2>
     </div>
     <p class="section-subtitle">Upload your data to get personalized AI recommendations. The more data sources you connect, the smarter the analysis.</p>
     """, unsafe_allow_html=True)
 
     st.markdown('<div class="info-box">🔒 <strong>Your data is secure.</strong> We don\'t store your data — it\'s processed in real-time and immediately deleted.</div>', unsafe_allow_html=True)
-    st.markdown('<div class="settings-label">Step 1 — Upload at least one data source</div>', unsafe_allow_html=True)
+    st.markdown('<div class="settings-label">Upload at least one data source</div>', unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns(3)
     with col1:
         st.markdown('<div class="upload-header">📢 Advertising Data <span class="req-badge">Required</span></div><div class="upload-source">Google Ads, Meta Ads, or any ad platform export</div>', unsafe_allow_html=True)
         ads_file = st.file_uploader("Upload Ads CSV", type=['csv'], key="ads_upload", label_visibility="collapsed")
         with st.expander("📋 Required columns"):
-            st.markdown("- `keyword` - Search term or ad group\n- `spend` - Total cost\n- `clicks` - Number of clicks\n- `conversions` - Number of conversions\n\n**Optional:** impressions, campaign, revenue")
+            st.markdown("- `keyword` — Search term or ad group\n- `spend` — Total cost\n- `clicks` — Number of clicks\n- `conversions` — Number of conversions\n\n**Optional:** impressions, campaign, revenue")
     with col2:
         st.markdown('<div class="upload-header">🔍 SEO Data <span class="opt-badge">Optional</span></div><div class="upload-source">SEMrush, Ahrefs, or Search Console</div>', unsafe_allow_html=True)
         seo_file = st.file_uploader("Upload SEO CSV", type=['csv'], key="seo_upload", label_visibility="collapsed")
         with st.expander("📋 Required columns"):
-            st.markdown("- `keyword` - Search term\n- `volume` - Monthly search volume\n\n**Optional:** cpc, competition, score")
+            st.markdown("- `keyword` — Search term\n- `volume` — Monthly search volume\n\n**Optional:** cpc, competition, score")
     with col3:
         st.markdown('<div class="upload-header">👥 CRM Data <span class="opt-badge">Optional</span></div><div class="upload-source">Salesforce, HubSpot, or your CRM</div>', unsafe_allow_html=True)
         crm_file = st.file_uploader("Upload CRM CSV", type=['csv'], key="crm_upload", label_visibility="collapsed")
         with st.expander("📋 Required columns"):
-            st.markdown("- `origin` or `source` - Lead source/keyword\n- `leads` - Number of leads\n\n**Optional:** qualified_leads, revenue, stage")
+            st.markdown("- `origin` or `source` — Lead source/keyword\n- `leads` — Number of leads\n\n**Optional:** qualified_leads, revenue, stage")
 
     st.markdown('<hr class="divider">', unsafe_allow_html=True)
 
@@ -569,7 +601,7 @@ def render_upload_tab():
 def render_connect_tab():
     st.markdown("""
     <div class="section-header">
-        <div class="icon-box" style="background: #e8f0fe; color: #2563eb;">🔌</div>
+        <div class="icon-box" style="background: rgba(59,130,246,0.1);">🔌</div>
         <h2>Connect Your Tools</h2>
     </div>
     <p class="section-subtitle">Skip CSV uploads — connect your marketing tools directly for automated, real-time intelligence.</p>
@@ -606,10 +638,10 @@ def render_connect_tab():
 def render_results_tab():
     if 'analysis_results' not in st.session_state or st.session_state.analysis_results is None:
         st.markdown("""
-        <div style="text-align: center; padding: 4rem 2rem;">
-            <div style="font-size: 3rem; margin-bottom: 1rem;">📈</div>
-            <h3 style="color: #374151; margin-bottom: 0.5rem;">No Results Yet</h3>
-            <p style="color: #9ca3af; font-size: 0.9rem;">Run an analysis from the <strong>Try Demo</strong> or <strong>Upload Data</strong> tab to see your marketing intelligence report here.</p>
+        <div class="empty-state">
+            <div class="es-icon">📈</div>
+            <h3>No Results Yet</h3>
+            <p>Run an analysis from the <strong>Try Demo</strong> or <strong>Upload Data</strong> tab to see your marketing intelligence report here.</p>
         </div>
         """, unsafe_allow_html=True)
         return
@@ -618,7 +650,7 @@ def render_results_tab():
 
     st.markdown("""
     <div class="section-header">
-        <div class="icon-box" style="background: #d1fae5; color: #059669;">📈</div>
+        <div class="icon-box" style="background: rgba(52,211,153,0.1);">📈</div>
         <h2>Marketing Intelligence Report</h2>
     </div>
     """, unsafe_allow_html=True)
@@ -629,17 +661,13 @@ def render_results_tab():
     summary = results.get('summary', {})
 
     col1, col2, col3, col4, col5 = st.columns(5)
-    with col1:
-        st.metric("💰 Monthly Savings", f"${stats.get('total_savings', 0):,}")
-    with col2:
-        st.metric("📊 Keywords Analyzed", f"{stats.get('total_units', 0):,}")
-    with col3:
-        st.metric("🎯 Avg Confidence", f"{stats.get('avg_confidence', 0)}%")
+    with col1: st.metric("💰 Monthly Savings", f"${stats.get('total_savings', 0):,}")
+    with col2: st.metric("📊 Keywords Analyzed", f"{stats.get('total_units', 0):,}")
+    with col3: st.metric("🎯 Avg Confidence", f"{stats.get('avg_confidence', 0)}%")
     with col4:
         actions = summary.get('stop', 0) + summary.get('fix', 0) + summary.get('invest', 0)
         st.metric("⚡ Actions Required", actions)
-    with col5:
-        st.metric("📈 Annual Impact", f"${stats.get('annual_savings', 0):,}")
+    with col5: st.metric("📈 Annual Impact", f"${stats.get('annual_savings', 0):,}")
 
     st.markdown('<hr class="divider">', unsafe_allow_html=True)
 
@@ -657,9 +685,8 @@ def render_results_tab():
     observe_count = len(recommendations.get('observe', []))
 
     tabs = st.tabs([f"🛑 STOP ({stop_count})", f"🔧 FIX ({fix_count})", f"💰 INVEST ({invest_count})", f"👁 OBSERVE ({observe_count})"])
-
     with tabs[0]:
-        st.markdown('<div class="rec-header stop">🛑 Pause these immediately — they\'re burning budget with no return.</div>', unsafe_allow_html=True)
+        st.markdown('<div class="rec-header stop">🛑 Pause these immediately — burning budget with no return.</div>', unsafe_allow_html=True)
         render_recommendations_table(recommendations.get('stop', []), "stop")
     with tabs[1]:
         st.markdown('<div class="rec-header fix">🔧 These have potential but need optimization to perform.</div>', unsafe_allow_html=True)
@@ -672,7 +699,6 @@ def render_results_tab():
         render_recommendations_table(recommendations.get('observe', []), "observe")
 
     st.markdown('<hr class="divider">', unsafe_allow_html=True)
-
     try:
         pdf_buffer = generate_pdf_report(results)
         st.download_button(label="📥 Download Full PDF Report", data=pdf_buffer, file_name=f"clarity_report_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf", mime="application/pdf", use_container_width=True)
@@ -698,7 +724,7 @@ def render_recommendations_table(data, action_type):
     st.dataframe(df, use_container_width=True, hide_index=True)
 
 def render_about_tab():
-    st.markdown('<div class="section-header"><div class="icon-box" style="background: #e8f0fe; color: #2563eb;">ℹ️</div><h2>About Clarity AI</h2></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header"><div class="icon-box" style="background: rgba(59,130,246,0.1);">ℹ️</div><h2>About Clarity AI</h2></div>', unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
     with col1:
@@ -706,13 +732,13 @@ def render_about_tab():
         <div class="about-card">
             <h4>🎯 The Problem</h4>
             <p>Marketers are drowning in dashboards but starving for direction.</p>
-            <p>Google Ads shows you CTR is 2.3%… but should you pause or scale? Analytics shows traffic is up… but is it profitable? CRM shows 50 leads… but which keywords drive revenue?</p>
+            <p>Google Ads shows CTR is 2.3%… but should you pause or scale? Analytics shows traffic is up… but is it profitable? CRM shows 50 leads… but which keywords drive revenue?</p>
             <p>The average marketer spends <strong>3+ hours/week</strong> manually analyzing data across platforms, often deciding on gut feel.</p>
-            <hr style="border-color: #e5e7eb; margin: 1.25rem 0;">
+            <hr>
             <h4>💡 The Solution</h4>
             <p>Clarity AI aggregates your Ads, SEO, and CRM data to deliver one thing dashboards can't: <strong>clear, prioritized actions.</strong></p>
-            <p>Instead of "CTR is 2.3%", you get:<br><span style="color:#dc2626; font-weight:600;">🛑 STOP</span> 'nike air max' — $542 spent, 0 conversions, 91% confident</p>
-            <p>Instead of "50 new leads", you get:<br><span style="color:#059669; font-weight:600;">💰 INVEST</span> in 'running shoes' — 85K searches, 42% qualification rate</p>
+            <p>Instead of "CTR is 2.3%", you get:<br><span style="color:#f87171; font-weight:600;">🛑 STOP</span> <span style="color:#cbd5e1;">'nike air max' — $542 spent, 0 conversions, 91% confident</span></p>
+            <p>Instead of "50 new leads", you get:<br><span style="color:#34d399; font-weight:600;">💰 INVEST</span> <span style="color:#cbd5e1;">in 'running shoes' — 85K searches, 42% qualification rate</span></p>
         </div>
         """, unsafe_allow_html=True)
     with col2:
@@ -726,7 +752,7 @@ def render_about_tab():
                 <li>E-commerce brands scaling paid acquisition</li>
                 <li>Anyone tired of spreadsheets and dashboard overload</li>
             </ul>
-            <hr style="border-color: #e5e7eb; margin: 1.25rem 0;">
+            <hr>
             <h4>🛠️ How It Works</h4>
             <ol>
                 <li><strong>CONNECT</strong> — Upload your data (or use integrations)</li>
@@ -734,7 +760,7 @@ def render_about_tab():
                 <li><strong>SCORE</strong> — AI scores each keyword on 3 dimensions</li>
                 <li><strong>ACT</strong> — Get STOP / FIX / INVEST / OBSERVE actions</li>
             </ol>
-            <hr style="border-color: #e5e7eb; margin: 1.25rem 0;">
+            <hr>
             <h4>🛠️ Tech Stack</h4>
             <p><strong>Frontend:</strong> Streamlit (Python)<br><strong>Backend:</strong> n8n workflow automation<br><strong>AI:</strong> OpenAI GPT-4o-mini for insights<br><strong>Hosting:</strong> Streamlit Cloud + Render</p>
         </div>
@@ -818,16 +844,11 @@ def main():
         "🎮 Try Demo", "📁 Upload Data", "🔌 Connect", "📈 Results", "ℹ️ About"
     ])
 
-    with tab_demo:
-        render_demo_tab()
-    with tab_upload:
-        render_upload_tab()
-    with tab_connect:
-        render_connect_tab()
-    with tab_results:
-        render_results_tab()
-    with tab_about:
-        render_about_tab()
+    with tab_demo: render_demo_tab()
+    with tab_upload: render_upload_tab()
+    with tab_connect: render_connect_tab()
+    with tab_results: render_results_tab()
+    with tab_about: render_about_tab()
 
 if __name__ == "__main__":
     main()
