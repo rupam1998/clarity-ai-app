@@ -564,18 +564,50 @@ def render_upload_tab():
     with col1:
         st.markdown('<div class="upload-header">📢 Advertising Data <span class="req-badge">Required</span></div><div class="upload-source">Google Ads, Meta Ads, or any ad platform export</div>', unsafe_allow_html=True)
         ads_file = st.file_uploader("Upload Ads CSV", type=['csv'], key="ads_upload", label_visibility="collapsed")
-        with st.expander("📋 Required columns"):
-            st.markdown("- `keyword` — Search term or ad group\n- `spend` — Total cost\n- `clicks` — Number of clicks\n- `conversions` — Number of conversions\n\n**Optional:** impressions, campaign, revenue")
+        st.markdown("""
+        <details style="background:#111827; border:1px solid #1e293b; border-radius:8px; padding:0; margin-top:4px;">
+            <summary style="padding:10px 14px; cursor:pointer; color:#94a3b8; font-size:0.83rem; font-weight:500; list-style:none; display:flex; align-items:center; gap:6px;">
+                <span style="font-size:0.75rem;">▸</span> Required columns
+            </summary>
+            <div style="padding:4px 14px 12px; color:#64748b; font-size:0.82rem; line-height:1.7;">
+                <code style="color:#60a5fa; background:rgba(59,130,246,0.1); padding:1px 5px; border-radius:3px;">keyword</code> — Search term or ad group<br>
+                <code style="color:#60a5fa; background:rgba(59,130,246,0.1); padding:1px 5px; border-radius:3px;">spend</code> — Total cost<br>
+                <code style="color:#60a5fa; background:rgba(59,130,246,0.1); padding:1px 5px; border-radius:3px;">clicks</code> — Number of clicks<br>
+                <code style="color:#60a5fa; background:rgba(59,130,246,0.1); padding:1px 5px; border-radius:3px;">conversions</code> — Number of conversions<br>
+                <span style="color:#475569; font-style:italic;">Optional: impressions, campaign, revenue</span>
+            </div>
+        </details>
+        """, unsafe_allow_html=True)
     with col2:
         st.markdown('<div class="upload-header">🔍 SEO Data <span class="opt-badge">Optional</span></div><div class="upload-source">SEMrush, Ahrefs, or Search Console</div>', unsafe_allow_html=True)
         seo_file = st.file_uploader("Upload SEO CSV", type=['csv'], key="seo_upload", label_visibility="collapsed")
-        with st.expander("📋 Required columns"):
-            st.markdown("- `keyword` — Search term\n- `volume` — Monthly search volume\n\n**Optional:** cpc, competition, score")
+        st.markdown("""
+        <details style="background:#111827; border:1px solid #1e293b; border-radius:8px; padding:0; margin-top:4px;">
+            <summary style="padding:10px 14px; cursor:pointer; color:#94a3b8; font-size:0.83rem; font-weight:500; list-style:none; display:flex; align-items:center; gap:6px;">
+                <span style="font-size:0.75rem;">▸</span> Required columns
+            </summary>
+            <div style="padding:4px 14px 12px; color:#64748b; font-size:0.82rem; line-height:1.7;">
+                <code style="color:#60a5fa; background:rgba(59,130,246,0.1); padding:1px 5px; border-radius:3px;">keyword</code> — Search term<br>
+                <code style="color:#60a5fa; background:rgba(59,130,246,0.1); padding:1px 5px; border-radius:3px;">volume</code> — Monthly search volume<br>
+                <span style="color:#475569; font-style:italic;">Optional: cpc, competition, score</span>
+            </div>
+        </details>
+        """, unsafe_allow_html=True)
     with col3:
         st.markdown('<div class="upload-header">👥 CRM Data <span class="opt-badge">Optional</span></div><div class="upload-source">Salesforce, HubSpot, or your CRM</div>', unsafe_allow_html=True)
         crm_file = st.file_uploader("Upload CRM CSV", type=['csv'], key="crm_upload", label_visibility="collapsed")
-        with st.expander("📋 Required columns"):
-            st.markdown("- `origin` or `source` — Lead source/keyword\n- `leads` — Number of leads\n\n**Optional:** qualified_leads, revenue, stage")
+        st.markdown("""
+        <details style="background:#111827; border:1px solid #1e293b; border-radius:8px; padding:0; margin-top:4px;">
+            <summary style="padding:10px 14px; cursor:pointer; color:#94a3b8; font-size:0.83rem; font-weight:500; list-style:none; display:flex; align-items:center; gap:6px;">
+                <span style="font-size:0.75rem;">▸</span> Required columns
+            </summary>
+            <div style="padding:4px 14px 12px; color:#64748b; font-size:0.82rem; line-height:1.7;">
+                <code style="color:#60a5fa; background:rgba(59,130,246,0.1); padding:1px 5px; border-radius:3px;">origin</code> or <code style="color:#60a5fa; background:rgba(59,130,246,0.1); padding:1px 5px; border-radius:3px;">source</code> — Lead source/keyword<br>
+                <code style="color:#60a5fa; background:rgba(59,130,246,0.1); padding:1px 5px; border-radius:3px;">leads</code> — Number of leads<br>
+                <span style="color:#475569; font-style:italic;">Optional: qualified_leads, revenue, stage</span>
+            </div>
+        </details>
+        """, unsafe_allow_html=True)
 
     st.markdown('<hr class="divider">', unsafe_allow_html=True)
 
