@@ -51,10 +51,15 @@ st.markdown("""
     }
 
     /* ── Expander ── */
-    [data-testid="stExpander"] { border-color: #1e293b !important; }
-    [data-testid="stExpander"] summary span { color: #cbd5e1 !important; }
-    [data-testid="stExpander"] div p,
-    [data-testid="stExpander"] div li { color: #94a3b8 !important; }
+    [data-testid="stExpander"] { border-color: #1e293b !important; background: transparent !important; }
+    [data-testid="stExpander"] details { border: 1px solid #1e293b !important; border-radius: 8px !important; background: #111827 !important; }
+    [data-testid="stExpander"] summary { color: #94a3b8 !important; background: #111827 !important; border-radius: 8px !important; }
+    [data-testid="stExpander"] summary span { color: #94a3b8 !important; font-size: 0.85rem !important; }
+    [data-testid="stExpander"] summary svg { color: #64748b !important; }
+    [data-testid="stExpander"] div[data-testid="stExpanderDetails"] { background: #111827 !important; }
+    [data-testid="stExpander"] div[data-testid="stExpanderDetails"] p,
+    [data-testid="stExpander"] div[data-testid="stExpanderDetails"] li { color: #94a3b8 !important; font-size: 0.83rem !important; }
+    [data-testid="stExpander"] div[data-testid="stExpanderDetails"] code { color: #60a5fa !important; background: rgba(59,130,246,0.1) !important; padding: 1px 5px; border-radius: 3px; }
 
     /* ── Alert boxes ── */
     .stAlert p { color: inherit !important; }
@@ -824,6 +829,7 @@ def run_analysis(mode, goal, budget, data=None):
         progress_bar.empty()
         st.session_state.analysis_results = results
         st.session_state.active_tab = "results"
+        st.session_state.show_results_inline = True
         st.rerun()
     else:
         progress_bar.empty()
@@ -837,8 +843,20 @@ def main():
         st.session_state.analysis_results = None
     if 'active_tab' not in st.session_state:
         st.session_state.active_tab = "demo"
+    if 'show_results_inline' not in st.session_state:
+        st.session_state.show_results_inline = False
 
     render_hero()
+
+    # If we just completed an analysis, show results directly
+    if st.session_state.show_results_inline and st.session_state.analysis_results:
+        st.session_state.show_results_inline = False
+        render_results_tab()
+        st.markdown('<hr class="divider">', unsafe_allow_html=True)
+        if st.button("← Back to All Tabs", use_container_width=False):
+            st.session_state.analysis_results = None
+            st.rerun()
+        return
 
     tab_demo, tab_upload, tab_connect, tab_results, tab_about = st.tabs([
         "🎮 Try Demo", "📁 Upload Data", "🔌 Connect", "📈 Results", "ℹ️ About"
