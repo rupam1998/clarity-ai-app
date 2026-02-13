@@ -7,7 +7,7 @@ AI-powered marketing intelligence that tells you exactly what to **STOP**, **FIX
 ![Clarity AI](https://img.shields.io/badge/Status-Beta-yellow)
 ![Python](https://img.shields.io/badge/Python-3.9+-blue)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.30+-red)
-
+Try the Clarity AI: https://clarity-ai-app-hrcqzinzokrjvm2he3dckp.streamlit.app/
 ## 🚀 Features
 
 - **⚡ Quick Demo** - Try with pre-built synthetic data (~15-20 seconds)
