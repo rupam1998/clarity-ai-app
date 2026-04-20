@@ -8,6 +8,7 @@ import pandas as pd
 import requests
 import json
 import time
+import base64
 from datetime import datetime
 from io import BytesIO
 import os
@@ -114,7 +115,7 @@ st.markdown("""
     }
     .spendsignal-nav .brand { display: flex; align-items: center; gap: 12px; }
     .spendsignal-nav .brand-logo {
-        width: 52px; height: 52px;
+        height: 48px; width: auto; display: block;
         filter: drop-shadow(0 2px 10px rgba(59,130,246,0.35));
         flex-shrink: 0;
     }
@@ -535,42 +536,37 @@ def parse_csv_file(uploaded_file, data_type):
 
 # ===== RENDER FUNCTIONS =====
 
+@st.cache_data
+def _brand_logo_data_uri():
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    for name in ("spendsignal-logo.png", "spendsignal-logo.jpg", "spendsignal-logo.svg"):
+        path = os.path.join(base_path, name)
+        if not os.path.exists(path):
+            continue
+        with open(path, "rb") as f:
+            encoded = base64.b64encode(f.read()).decode("ascii")
+        ext = name.rsplit(".", 1)[-1].lower()
+        mime = "image/svg+xml" if ext == "svg" else ("image/png" if ext == "png" else "image/jpeg")
+        # The file committed to the repo is actually a JPEG regardless of extension
+        if ext == "png":
+            with open(path, "rb") as f:
+                header = f.read(4)
+            if header[:3] == b"\xff\xd8\xff":
+                mime = "image/jpeg"
+        return f"data:{mime};base64,{encoded}"
+    return None
+
 def render_hero():
-    st.markdown("""
+    logo_uri = _brand_logo_data_uri()
+    logo_html = (
+        f'<img class="brand-logo" src="{logo_uri}" alt="Spendsignal.ai"/>'
+        if logo_uri else
+        '<span class="brand-name">Spendsignal.ai</span>'
+    )
+    st.markdown(f"""
     <div class="spendsignal-nav">
         <div class="brand">
-            <svg class="brand-logo" width="52" height="52" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="Spendsignal.ai">
-                <defs>
-                    <linearGradient id="ssBladeLight" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#93c5fd"/>
-                        <stop offset="100%" stop-color="#3b82f6"/>
-                    </linearGradient>
-                    <linearGradient id="ssBladeDark" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#2563eb"/>
-                        <stop offset="100%" stop-color="#1e3a8a"/>
-                    </linearGradient>
-                </defs>
-                <g transform="translate(50 50)">
-                    <!-- 4 curved swirling blades, alternating light/dark -->
-                    <g>
-                        <path d="M -3 -6 C -8 -25, 15 -40, 32 -30 C 22 -18, 8 -12, 0 -2 Z"
-                              fill="url(#ssBladeDark)"/>
-                    </g>
-                    <g transform="rotate(90)">
-                        <path d="M -3 -6 C -8 -25, 15 -40, 32 -30 C 22 -18, 8 -12, 0 -2 Z"
-                              fill="url(#ssBladeLight)"/>
-                    </g>
-                    <g transform="rotate(180)">
-                        <path d="M -3 -6 C -8 -25, 15 -40, 32 -30 C 22 -18, 8 -12, 0 -2 Z"
-                              fill="url(#ssBladeDark)"/>
-                    </g>
-                    <g transform="rotate(270)">
-                        <path d="M -3 -6 C -8 -25, 15 -40, 32 -30 C 22 -18, 8 -12, 0 -2 Z"
-                              fill="url(#ssBladeLight)"/>
-                    </g>
-                </g>
-            </svg>
-            <span class="brand-name">Spendsignal.ai</span>
+            {logo_html}
         </div>
         <span class="tagline">AI-powered marketing intelligence — Know what to STOP, FIX, INVEST, or OBSERVE.</span>
     </div>
