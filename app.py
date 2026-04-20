@@ -113,18 +113,12 @@ st.markdown("""
         pointer-events: none;
     }
     .spendsignal-nav .brand { display: flex; align-items: center; gap: 12px; }
-    .spendsignal-nav .brand-icon {
-        width: 40px; height: 40px;
-        background: linear-gradient(135deg, #3b82f6, #60a5fa);
-        border-radius: 10px; display: flex; align-items: center; justify-content: center;
-        font-size: 1.2rem; box-shadow: 0 2px 10px rgba(59,130,246,0.4);
+    .spendsignal-nav .brand-logo {
+        width: 44px; height: 44px;
+        filter: drop-shadow(0 2px 10px rgba(59,130,246,0.35));
+        flex-shrink: 0;
     }
-    .spendsignal-nav .brand-name { font-size: 1.35rem; font-weight: 700; color: #ffffff !important; letter-spacing: -0.5px; }
-    .spendsignal-nav .brand-tag {
-        font-size: 0.7rem; font-weight: 600; color: #fbbf24 !important;
-        background: rgba(251,191,36,0.12); padding: 3px 10px; border-radius: 20px;
-        letter-spacing: 0.5px; border: 1px solid rgba(251,191,36,0.2);
-    }
+    .spendsignal-nav .brand-name { font-size: 1.5rem; font-weight: 700; color: #ffffff !important; letter-spacing: -0.5px; }
     .spendsignal-nav .tagline { color: #94a3b8 !important; font-size: 0.85rem; font-weight: 500; }
 
     /* ── Tabs ── */
@@ -318,10 +312,37 @@ st.markdown("""
     [data-baseweb="input"] input { color: #e2e8f0 !important; }
     [data-baseweb="textarea"] textarea { background-color: var(--bg-input) !important; color: #e2e8f0 !important; border-color: var(--border) !important; }
 
-    /* File uploader */
-    [data-testid="stFileUploader"] section { background-color: var(--bg-card) !important; border-color: var(--border) !important; }
-    [data-testid="stFileUploader"] small { color: #64748b !important; }
-    [data-testid="stFileUploader"] button { color: #e2e8f0 !important; background: var(--bg-elevated) !important; border-color: var(--border) !important; }
+    /* File uploader — compact layout for narrow columns */
+    [data-testid="stFileUploader"] section,
+    [data-testid="stFileUploaderDropzone"] {
+        background-color: var(--bg-card) !important;
+        border: 1px dashed var(--border) !important;
+        border-radius: var(--radius-sm) !important;
+        padding: 0.75rem !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+        min-height: auto !important;
+    }
+    [data-testid="stFileUploaderDropzoneInstructions"] {
+        display: none !important;
+    }
+    [data-testid="stFileUploader"] button,
+    [data-testid="stFileUploaderDropzone"] button {
+        width: 100% !important;
+        margin: 0 !important;
+        color: #e2e8f0 !important;
+        background: var(--bg-elevated) !important;
+        border: 1px solid var(--border) !important;
+        font-size: 0.82rem !important;
+        font-weight: 600 !important;
+        padding: 0.55rem 0.75rem !important;
+        white-space: nowrap !important;
+        text-overflow: ellipsis !important;
+        overflow: hidden !important;
+    }
+    [data-testid="stFileUploader"] small { color: #64748b !important; font-size: 0.72rem !important; }
+    [data-testid="stFileUploader"] [data-testid="stFileUploaderFileName"] { color: #e2e8f0 !important; font-size: 0.82rem !important; }
 
     /* Dataframe */
     .stDataFrame [data-testid="stDataFrameResizable"] { background: var(--bg-card) !important; }
@@ -490,9 +511,30 @@ def render_hero():
     st.markdown("""
     <div class="spendsignal-nav">
         <div class="brand">
-            <div class="brand-icon">📡</div>
-            <span class="brand-name">SpendSignal.ai</span>
-            <span class="brand-tag">BETA</span>
+            <svg class="brand-logo" width="44" height="44" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-label="Spendsignal.ai">
+                <defs>
+                    <linearGradient id="ssBlade1" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#60a5fa"/>
+                        <stop offset="100%" stop-color="#2563eb"/>
+                    </linearGradient>
+                    <linearGradient id="ssBlade2" x1="100%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="#93c5fd"/>
+                        <stop offset="100%" stop-color="#3b82f6"/>
+                    </linearGradient>
+                </defs>
+                <g transform="translate(32 32)">
+                    <g>
+                        <path d="M0 -22 C 10 -22, 18 -14, 18 -4 C 18 -10, 10 -14, 0 -14 Z" fill="url(#ssBlade1)"/>
+                        <path d="M0 -22 C 10 -22, 18 -14, 18 -4 C 18 -10, 10 -14, 0 -14 Z" fill="url(#ssBlade2)" transform="rotate(60)"/>
+                        <path d="M0 -22 C 10 -22, 18 -14, 18 -4 C 18 -10, 10 -14, 0 -14 Z" fill="url(#ssBlade1)" transform="rotate(120)"/>
+                        <path d="M0 -22 C 10 -22, 18 -14, 18 -4 C 18 -10, 10 -14, 0 -14 Z" fill="url(#ssBlade2)" transform="rotate(180)"/>
+                        <path d="M0 -22 C 10 -22, 18 -14, 18 -4 C 18 -10, 10 -14, 0 -14 Z" fill="url(#ssBlade1)" transform="rotate(240)"/>
+                        <path d="M0 -22 C 10 -22, 18 -14, 18 -4 C 18 -10, 10 -14, 0 -14 Z" fill="url(#ssBlade2)" transform="rotate(300)"/>
+                    </g>
+                    <circle r="5" fill="#1e3a8a"/>
+                </g>
+            </svg>
+            <span class="brand-name">Spendsignal.ai</span>
         </div>
         <span class="tagline">AI-powered marketing intelligence — Know what to STOP, FIX, INVEST, or OBSERVE.</span>
     </div>
@@ -818,15 +860,15 @@ def render_about_tab():
 
     st.markdown("")
     st.markdown('<div class="settings-label">📬 Feedback & Contact</div>', unsafe_allow_html=True)
-    st.markdown("This is an early beta. Your feedback shapes the product.")
-    feedback = st.text_area("What features would make SpendSignal.ai more useful for you?", height=100)
+    st.markdown("Your feedback shapes the product.")
+    feedback = st.text_area("What features would make Spendsignal.ai more useful for you?", height=100)
     if st.button("📤 Send Feedback"):
         if feedback:
             st.success("✅ Thank you for your feedback! We read every response.")
         else:
             st.warning("Please enter your feedback first.")
 
-    st.markdown('<div class="app-footer">Version 0.1.0 (Beta) · © 2026 SpendSignal.ai · All rights reserved</div>', unsafe_allow_html=True)
+    st.markdown('<div class="app-footer">Version 0.1.0 · © 2026 Spendsignal.ai · All rights reserved</div>', unsafe_allow_html=True)
 
 def run_analysis(mode, goal, budget, data=None):
     goal_map = {"Maximize ROAS": "roas", "Increase Conversions": "conversions", "Reduce CPA": "cpa", "Scale Traffic": "traffic"}
