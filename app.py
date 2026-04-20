@@ -1,5 +1,5 @@
 """
-SpendSignal.ai - Marketing Intelligence Platform
+Spendsignal.ai - Marketing Intelligence Platform
 Stop wasting. Start knowing.
 """
 
@@ -13,7 +13,7 @@ from io import BytesIO
 import os
 
 st.set_page_config(
-    page_title="SpendSignal.ai - Marketing Intelligence",
+    page_title="Spendsignal.ai - Marketing Intelligence",
     page_icon="📡",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -114,7 +114,7 @@ st.markdown("""
     }
     .spendsignal-nav .brand { display: flex; align-items: center; gap: 12px; }
     .spendsignal-nav .brand-logo {
-        width: 44px; height: 44px;
+        width: 52px; height: 52px;
         filter: drop-shadow(0 2px 10px rgba(59,130,246,0.35));
         flex-shrink: 0;
     }
@@ -312,37 +312,65 @@ st.markdown("""
     [data-baseweb="input"] input { color: #e2e8f0 !important; }
     [data-baseweb="textarea"] textarea { background-color: var(--bg-input) !important; color: #e2e8f0 !important; border-color: var(--border) !important; }
 
-    /* File uploader — compact layout for narrow columns */
+    /* File uploader — hide default text completely, overlay custom label */
     [data-testid="stFileUploader"] section,
     [data-testid="stFileUploaderDropzone"] {
+        position: relative !important;
         background-color: var(--bg-card) !important;
         border: 1px dashed var(--border) !important;
         border-radius: var(--radius-sm) !important;
-        padding: 0.75rem !important;
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 8px !important;
-        min-height: auto !important;
-    }
-    [data-testid="stFileUploaderDropzoneInstructions"] {
-        display: none !important;
-    }
-    [data-testid="stFileUploader"] button,
-    [data-testid="stFileUploaderDropzone"] button {
-        width: 100% !important;
-        margin: 0 !important;
-        color: #e2e8f0 !important;
-        background: var(--bg-elevated) !important;
-        border: 1px solid var(--border) !important;
-        font-size: 0.82rem !important;
-        font-weight: 600 !important;
-        padding: 0.55rem 0.75rem !important;
-        white-space: nowrap !important;
-        text-overflow: ellipsis !important;
+        padding: 0 !important;
+        min-height: 56px !important;
         overflow: hidden !important;
     }
-    [data-testid="stFileUploader"] small { color: #64748b !important; font-size: 0.72rem !important; }
-    [data-testid="stFileUploader"] [data-testid="stFileUploaderFileName"] { color: #e2e8f0 !important; font-size: 0.82rem !important; }
+    /* Nuke all visible text inside the dropzone */
+    [data-testid="stFileUploader"] section *,
+    [data-testid="stFileUploaderDropzone"] * {
+        color: transparent !important;
+        font-size: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+    /* Make the native button fill the entire dropzone and stay clickable (but invisible) */
+    [data-testid="stFileUploader"] section button,
+    [data-testid="stFileUploaderDropzone"] button,
+    [data-testid="stFileUploader"] [data-testid="stBaseButton-secondary"] {
+        position: absolute !important;
+        inset: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        opacity: 0 !important;
+        z-index: 2 !important;
+        cursor: pointer !important;
+    }
+    /* Overlay our own label — non-interactive so clicks hit the button below */
+    [data-testid="stFileUploader"] section::after,
+    [data-testid="stFileUploaderDropzone"]::after {
+        content: "📎 Choose CSV file";
+        position: absolute !important;
+        inset: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        color: #e2e8f0 !important;
+        font-size: 0.85rem !important;
+        font-weight: 600 !important;
+        z-index: 1 !important;
+        pointer-events: none !important;
+        white-space: nowrap !important;
+    }
+    /* Uploaded-file row lives outside the dropzone — restore visibility there */
+    [data-testid="stFileUploader"] [data-testid="stFileUploaderFile"],
+    [data-testid="stFileUploader"] [data-testid="stFileUploaderFileData"],
+    [data-testid="stFileUploader"] [data-testid="stFileUploaderFileName"],
+    [data-testid="stFileUploader"] [data-testid="stFileUploaderDeleteBtn"] {
+        color: #e2e8f0 !important;
+        font-size: 0.8rem !important;
+        background: transparent !important;
+    }
 
     /* Dataframe */
     .stDataFrame [data-testid="stDataFrameResizable"] { background: var(--bg-card) !important; }
@@ -475,7 +503,7 @@ def generate_pdf_report(results):
             story.append(Spacer(1, 15))
 
     story.append(Spacer(1, 30))
-    story.append(Paragraph("Generated by SpendSignal.ai | spendsignal.ai | Built by Rupam Patra",
+    story.append(Paragraph("Generated by Spendsignal.ai | spendsignal.ai | Built by Rupam Patra",
                           ParagraphStyle('Footer', parent=styles['Normal'], fontSize=8, textColor=colors.gray)))
     doc.build(story)
     buffer.seek(0)
@@ -511,27 +539,35 @@ def render_hero():
     st.markdown("""
     <div class="spendsignal-nav">
         <div class="brand">
-            <svg class="brand-logo" width="44" height="44" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-label="Spendsignal.ai">
+            <svg class="brand-logo" width="52" height="52" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="Spendsignal.ai">
                 <defs>
-                    <linearGradient id="ssBlade1" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#60a5fa"/>
-                        <stop offset="100%" stop-color="#2563eb"/>
-                    </linearGradient>
-                    <linearGradient id="ssBlade2" x1="100%" y1="0%" x2="0%" y2="100%">
+                    <linearGradient id="ssBladeLight" x1="0%" y1="0%" x2="100%" y2="100%">
                         <stop offset="0%" stop-color="#93c5fd"/>
                         <stop offset="100%" stop-color="#3b82f6"/>
                     </linearGradient>
+                    <linearGradient id="ssBladeDark" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#2563eb"/>
+                        <stop offset="100%" stop-color="#1e3a8a"/>
+                    </linearGradient>
                 </defs>
-                <g transform="translate(32 32)">
+                <g transform="translate(50 50)">
+                    <!-- 4 curved swirling blades, alternating light/dark -->
                     <g>
-                        <path d="M0 -22 C 10 -22, 18 -14, 18 -4 C 18 -10, 10 -14, 0 -14 Z" fill="url(#ssBlade1)"/>
-                        <path d="M0 -22 C 10 -22, 18 -14, 18 -4 C 18 -10, 10 -14, 0 -14 Z" fill="url(#ssBlade2)" transform="rotate(60)"/>
-                        <path d="M0 -22 C 10 -22, 18 -14, 18 -4 C 18 -10, 10 -14, 0 -14 Z" fill="url(#ssBlade1)" transform="rotate(120)"/>
-                        <path d="M0 -22 C 10 -22, 18 -14, 18 -4 C 18 -10, 10 -14, 0 -14 Z" fill="url(#ssBlade2)" transform="rotate(180)"/>
-                        <path d="M0 -22 C 10 -22, 18 -14, 18 -4 C 18 -10, 10 -14, 0 -14 Z" fill="url(#ssBlade1)" transform="rotate(240)"/>
-                        <path d="M0 -22 C 10 -22, 18 -14, 18 -4 C 18 -10, 10 -14, 0 -14 Z" fill="url(#ssBlade2)" transform="rotate(300)"/>
+                        <path d="M -3 -6 C -8 -25, 15 -40, 32 -30 C 22 -18, 8 -12, 0 -2 Z"
+                              fill="url(#ssBladeDark)"/>
                     </g>
-                    <circle r="5" fill="#1e3a8a"/>
+                    <g transform="rotate(90)">
+                        <path d="M -3 -6 C -8 -25, 15 -40, 32 -30 C 22 -18, 8 -12, 0 -2 Z"
+                              fill="url(#ssBladeLight)"/>
+                    </g>
+                    <g transform="rotate(180)">
+                        <path d="M -3 -6 C -8 -25, 15 -40, 32 -30 C 22 -18, 8 -12, 0 -2 Z"
+                              fill="url(#ssBladeDark)"/>
+                    </g>
+                    <g transform="rotate(270)">
+                        <path d="M -3 -6 C -8 -25, 15 -40, 32 -30 C 22 -18, 8 -12, 0 -2 Z"
+                              fill="url(#ssBladeLight)"/>
+                    </g>
                 </g>
             </svg>
             <span class="brand-name">Spendsignal.ai</span>
@@ -544,9 +580,9 @@ def render_demo_tab():
     st.markdown("""
     <div class="section-header">
         <div class="icon-box" style="background: rgba(59,130,246,0.1);">🎮</div>
-        <h2>Try SpendSignal.ai with Demo Data</h2>
+        <h2>Try Spendsignal.ai with Demo Data</h2>
     </div>
-    <p class="section-subtitle">Experience the full power of SpendSignal.ai. No signup required — pick a demo mode and see AI-powered recommendations in action.</p>
+    <p class="section-subtitle">Experience the full power of Spendsignal.ai. No signup required — pick a demo mode and see AI-powered recommendations in action.</p>
     """, unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
@@ -803,7 +839,7 @@ def render_recommendations_table(data, action_type):
     st.dataframe(df, use_container_width=True, hide_index=True)
 
 def render_about_tab():
-    st.markdown('<div class="section-header"><div class="icon-box" style="background: rgba(59,130,246,0.1);">ℹ️</div><h2>About SpendSignal.ai</h2></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header"><div class="icon-box" style="background: rgba(59,130,246,0.1);">ℹ️</div><h2>About Spendsignal.ai</h2></div>', unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
     with col1:
@@ -815,7 +851,7 @@ def render_about_tab():
             <p>The average marketer spends <strong>3+ hours/week</strong> manually analyzing data across platforms, often deciding on gut feel.</p>
             <hr>
             <h4>💡 The Solution</h4>
-            <p>SpendSignal.ai aggregates your Ads, SEO, and CRM data to deliver one thing dashboards can't: <strong>clear, prioritized actions.</strong></p>
+            <p>Spendsignal.ai aggregates your Ads, SEO, and CRM data to deliver one thing dashboards can't: <strong>clear, prioritized actions.</strong></p>
             <p>Instead of "CTR is 2.3%", you get:<br><span style="color:#f87171; font-weight:600;">🛑 STOP</span> <span style="color:#cbd5e1;">'nike air max' — $542 spent, 0 conversions, 91% confident</span></p>
             <p>Instead of "50 new leads", you get:<br><span style="color:#34d399; font-weight:600;">💰 INVEST</span> <span style="color:#cbd5e1;">in 'running shoes' — 85K searches, 42% qualification rate</span></p>
         </div>
@@ -852,7 +888,7 @@ def render_about_tab():
         <div class="author-info">
             <h4>Rupam Patra</h4>
             <p>Senior Software Engineer · AI & Business Transformation</p>
-            <p style="margin-top: 6px;">Building SpendSignal.ai to solve a problem I've seen repeatedly: marketers have access to more data than ever, but less clarity on what to actually do with it.</p>
+            <p style="margin-top: 6px;">Building Spendsignal.ai to solve a problem I've seen repeatedly: marketers have access to more data than ever, but less clarity on what to actually do with it.</p>
             <p style="margin-top: 8px;"><a href="https://linkedin.com/in/rupam-patra" target="_blank">🔗 LinkedIn</a></p>
         </div>
     </div>
@@ -887,7 +923,7 @@ def run_analysis(mode, goal, budget, data=None):
         data = synthetic_data
         progress_bar.progress(30)
 
-    status_text.text("🔄 Connecting to SpendSignal.ai engine...")
+    status_text.text("🔄 Connecting to Spendsignal.ai engine...")
     progress_bar.progress(40)
     status_text.text("🧠 Running AI analysis (this may take 30-60 seconds)...")
     progress_bar.progress(50)
