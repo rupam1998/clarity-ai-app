@@ -318,31 +318,52 @@ st.markdown("""
         background-color: var(--bg-card) !important;
         border: 1px dashed var(--border) !important;
         border-radius: var(--radius-sm) !important;
-        padding: 0.75rem !important;
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 8px !important;
+        padding: 0.5rem !important;
         min-height: auto !important;
+        position: relative !important;
     }
+    /* Hide every child of the dropzone, then un-hide the button */
+    [data-testid="stFileUploader"] section > *,
+    [data-testid="stFileUploaderDropzone"] > *,
     [data-testid="stFileUploaderDropzoneInstructions"] {
         display: none !important;
     }
-    [data-testid="stFileUploader"] button,
-    [data-testid="stFileUploaderDropzone"] button {
+    [data-testid="stFileUploader"] section > button,
+    [data-testid="stFileUploaderDropzone"] > button,
+    [data-testid="stFileUploader"] section [data-testid="stBaseButton-secondary"],
+    [data-testid="stFileUploaderDropzone"] [data-testid="stBaseButton-secondary"] {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
         width: 100% !important;
         margin: 0 !important;
         color: #e2e8f0 !important;
         background: var(--bg-elevated) !important;
         border: 1px solid var(--border) !important;
+        border-radius: var(--radius-sm) !important;
         font-size: 0.82rem !important;
         font-weight: 600 !important;
         padding: 0.55rem 0.75rem !important;
-        white-space: nowrap !important;
-        text-overflow: ellipsis !important;
-        overflow: hidden !important;
+        cursor: pointer !important;
     }
-    [data-testid="stFileUploader"] small { color: #64748b !important; font-size: 0.72rem !important; }
-    [data-testid="stFileUploader"] [data-testid="stFileUploaderFileName"] { color: #e2e8f0 !important; font-size: 0.82rem !important; }
+    /* Replace the default "Browse files" text with a clean "Choose file" label */
+    [data-testid="stFileUploader"] section button > *,
+    [data-testid="stFileUploaderDropzone"] button > * {
+        display: none !important;
+    }
+    [data-testid="stFileUploader"] section button::before,
+    [data-testid="stFileUploaderDropzone"] button::before {
+        content: "📎 Choose file";
+    }
+    /* Show the file list after upload */
+    [data-testid="stFileUploader"] [data-testid="stFileUploaderFile"],
+    [data-testid="stFileUploader"] [data-testid="stFileUploaderFileData"] {
+        display: flex !important;
+    }
+    [data-testid="stFileUploader"] [data-testid="stFileUploaderFileName"] {
+        color: #e2e8f0 !important;
+        font-size: 0.8rem !important;
+    }
 
     /* Dataframe */
     .stDataFrame [data-testid="stDataFrameResizable"] { background: var(--bg-card) !important; }
@@ -511,27 +532,26 @@ def render_hero():
     st.markdown("""
     <div class="spendsignal-nav">
         <div class="brand">
-            <svg class="brand-logo" width="44" height="44" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-label="Spendsignal.ai">
+            <svg class="brand-logo" width="48" height="48" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="Spendsignal.ai">
                 <defs>
-                    <linearGradient id="ssBlade1" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#60a5fa"/>
-                        <stop offset="100%" stop-color="#2563eb"/>
-                    </linearGradient>
-                    <linearGradient id="ssBlade2" x1="100%" y1="0%" x2="0%" y2="100%">
+                    <linearGradient id="ssBladeLight" x1="0%" y1="0%" x2="100%" y2="100%">
                         <stop offset="0%" stop-color="#93c5fd"/>
                         <stop offset="100%" stop-color="#3b82f6"/>
                     </linearGradient>
+                    <linearGradient id="ssBladeDark" x1="100%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="#2563eb"/>
+                        <stop offset="100%" stop-color="#1e40af"/>
+                    </linearGradient>
                 </defs>
-                <g transform="translate(32 32)">
-                    <g>
-                        <path d="M0 -22 C 10 -22, 18 -14, 18 -4 C 18 -10, 10 -14, 0 -14 Z" fill="url(#ssBlade1)"/>
-                        <path d="M0 -22 C 10 -22, 18 -14, 18 -4 C 18 -10, 10 -14, 0 -14 Z" fill="url(#ssBlade2)" transform="rotate(60)"/>
-                        <path d="M0 -22 C 10 -22, 18 -14, 18 -4 C 18 -10, 10 -14, 0 -14 Z" fill="url(#ssBlade1)" transform="rotate(120)"/>
-                        <path d="M0 -22 C 10 -22, 18 -14, 18 -4 C 18 -10, 10 -14, 0 -14 Z" fill="url(#ssBlade2)" transform="rotate(180)"/>
-                        <path d="M0 -22 C 10 -22, 18 -14, 18 -4 C 18 -10, 10 -14, 0 -14 Z" fill="url(#ssBlade1)" transform="rotate(240)"/>
-                        <path d="M0 -22 C 10 -22, 18 -14, 18 -4 C 18 -10, 10 -14, 0 -14 Z" fill="url(#ssBlade2)" transform="rotate(300)"/>
-                    </g>
-                    <circle r="5" fill="#1e3a8a"/>
+                <g transform="translate(50 50)">
+                    <path d="M 0 -38 C 22 -38, 34 -22, 30 -4 C 22 -14, 10 -18, 0 -16 Z"
+                          fill="url(#ssBladeDark)" transform="rotate(0)"/>
+                    <path d="M 0 -38 C 22 -38, 34 -22, 30 -4 C 22 -14, 10 -18, 0 -16 Z"
+                          fill="url(#ssBladeLight)" transform="rotate(90)"/>
+                    <path d="M 0 -38 C 22 -38, 34 -22, 30 -4 C 22 -14, 10 -18, 0 -16 Z"
+                          fill="url(#ssBladeDark)" transform="rotate(180)"/>
+                    <path d="M 0 -38 C 22 -38, 34 -22, 30 -4 C 22 -14, 10 -18, 0 -16 Z"
+                          fill="url(#ssBladeLight)" transform="rotate(270)"/>
                 </g>
             </svg>
             <span class="brand-name">Spendsignal.ai</span>
